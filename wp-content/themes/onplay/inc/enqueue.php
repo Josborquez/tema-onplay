@@ -66,6 +66,16 @@ add_action(
 				),
 			)
 		);
+
+		// Endpoint de filtros del listado (Módulo 6).
+		wp_localize_script(
+			'onplay-main',
+			'onplayFilters',
+			array(
+				'ajaxUrl' => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
+				'nonce'   => wp_create_nonce( 'onplay_filter' ),
+			)
+		);
 	}
 );
 

@@ -465,15 +465,395 @@
 		});
 	}
 
+	// ──────────────────────────────────────────────────────────
+	// Filters — Módulo 6: sidebar facetado del listado
+	// ──────────────────────────────────────────────────────────
+	var Filters = {
+		// Estado en memoria. Se sincroniza con URLSearchParams en cada cambio.
+		state: null,
+		controller: null,
+		debounceTimer: null,
+		debounceMs: 250,
+
+		root: null,       // .shop-results (host)
+		sidebar: null,    // .shop-sidebar
+		grid: null,       // [data-shop-grid]
+		pagination: null, // [data-shop-pagination]
+		chips: null,      // [data-shop-chips]
+		count: null,      // [data-shop-count]
+		loading: null,    // [data-shop-loading]
+		sort: null,       // [data-shop-sort]
+
+		init: function () {
+			Filters.root = document.querySelector("[data-shop-results]");
+			Filters.sidebar = document.querySelector("[data-filters-sidebar]");
+			if (!Filters.root || !Filters.sidebar) return;
+			if (!window.onplayFilters || !window.onplayFilters.ajaxUrl) return;
+
+			Filters.grid = Filters.root.querySelector("[data-shop-grid]");
+			Filters.pagination = Filters.root.querySelector("[data-shop-pagination]");
+			Filters.chips = Filters.root.querySelector("[data-shop-chips]");
+			Filters.count = document.querySelector("[data-shop-count]");
+			Filters.loading = Filters.root.querySelector("[data-shop-loading]");
+			Filters.sort = document.querySelector("[data-shop-sort]");
+
+			Filters.state = Filters.readStateFromURL();
+			Filters.applyStateToUI();
+
+			Filters.bindSidebar();
+			Filters.bindSort();
+			Filters.bindPagination();
+			Filters.bindChips();
+			Filters.bindGroupHeaders();
+			Filters.bindSetSearch();
+
+			window.addEventListener("popstate", Filters.onPopState);
+		},
+
+		// ── Estado ↔ URL ──────────────────────────────
+		defaultState: function () {
+			return {
+				set: [],
+				color: [],
+				rarity: [],
+				condition: [],
+				lang: [],
+				foil: "all",
+				price_min: 0,
+				price_max: 500000,
+				in_stock: true,
+				sort: "price-desc",
+				page: 1,
+			};
+		},
+
+		readStateFromURL: function () {
+			var s = Filters.defaultState();
+			var p = new URLSearchParams(window.location.search);
+			["set", "color", "rarity", "condition", "lang"].forEach(function (k) {
+				if (p.has(k)) s[k] = p.getAll(k);
+				else if (p.has(k + "[]")) s[k] = p.getAll(k + "[]");
+			});
+			if (p.has("foil")) s.foil = p.get("foil");
+			if (p.has("price_min")) s.price_min = parseInt(p.get("price_min"), 10) || 0;
+			if (p.has("price_max")) s.price_max = parseInt(p.get("price_max"), 10) || 0;
+			if (p.has("in_stock")) s.in_stock = p.get("in_stock") === "1";
+			if (p.has("sort")) s.sort = p.get("sort");
+			if (p.has("page")) s.page = Math.max(1, parseInt(p.get("page"), 10) || 1);
+			return s;
+		},
+
+		writeStateToURL: function (push) {
+			var p = new URLSearchParams();
+			["set", "color", "rarity", "condition", "lang"].forEach(function (k) {
+				Filters.state[k].forEach(function (v) { p.append(k, v); });
+			});
+			if (Filters.state.foil !== "all") p.set("foil", Filters.state.foil);
+			if (Filters.state.price_min > 0) p.set("price_min", String(Filters.state.price_min));
+			if (Filters.state.price_max > 0 && Filters.state.price_max !== 500000) {
+				p.set("price_max", String(Filters.state.price_max));
+			}
+			if (!Filters.state.in_stock) p.set("in_stock", "0");
+			if (Filters.state.sort && Filters.state.sort !== "price-desc") p.set("sort", Filters.state.sort);
+			if (Filters.state.page > 1) p.set("page", String(Filters.state.page));
+
+			var qs = p.toString();
+			var url = window.location.pathname + (qs ? "?" + qs : "");
+			if (push) {
+				window.history.pushState({ onplayFilters: true }, "", url);
+			} else {
+				window.history.replaceState({ onplayFilters: true }, "", url);
+			}
+		},
+
+		applyStateToUI: function () {
+			// Checkboxes y multi-buttons.
+			var groups = [
+				{ key: "set", attr: "input[data-filter='set']", type: "checkbox" },
+				{ key: "rarity", attr: "input[data-filter='rarity']", type: "checkbox" },
+				{ key: "color", attr: "[data-filter='color']", type: "aria" },
+				{ key: "condition", attr: "[data-filter='condition']", type: "aria" },
+				{ key: "lang", attr: "[data-filter='lang']", type: "aria" },
+			];
+			groups.forEach(function (g) {
+				var nodes = Filters.sidebar.querySelectorAll(g.attr);
+				nodes.forEach(function (n) {
+					var v = n.value || n.getAttribute("data-value");
+					var on = Filters.state[g.key].indexOf(v) >= 0;
+					if (g.type === "checkbox") {
+						n.checked = on;
+					} else {
+						n.setAttribute("aria-pressed", on ? "true" : "false");
+					}
+				});
+			});
+
+			// Foil tri-state.
+			var foilBtns = Filters.sidebar.querySelectorAll("[data-filter='foil']");
+			foilBtns.forEach(function (b) {
+				var on = b.getAttribute("data-value") === Filters.state.foil;
+				b.classList.toggle("is-active", on);
+				b.setAttribute("aria-pressed", on ? "true" : "false");
+				b.setAttribute("aria-checked", on ? "true" : "false");
+			});
+
+			// Price.
+			var pmin = Filters.sidebar.querySelector("[data-filter='price_min']");
+			var pmax = Filters.sidebar.querySelector("[data-filter='price_max']");
+			var slider = Filters.sidebar.querySelector("[data-price-slider]");
+			if (pmin) pmin.value = Filters.state.price_min || 0;
+			if (pmax) pmax.value = Filters.state.price_max || 500000;
+			if (slider) slider.value = Filters.state.price_max || 500000;
+
+			// Stock toggle.
+			var stockChk = Filters.sidebar.querySelector("[data-filter='in_stock']");
+			if (stockChk) stockChk.checked = !!Filters.state.in_stock;
+
+			// Sort.
+			if (Filters.sort) Filters.sort.value = Filters.state.sort;
+		},
+
+		// ── Bindings ──────────────────────────────────
+		bindSidebar: function () {
+			Filters.sidebar.addEventListener("change", function (e) {
+				var t = e.target;
+				if (!t.matches) return;
+
+				if (t.matches("input[type='checkbox'][data-filter]")) {
+					var f = t.getAttribute("data-filter");
+					var v = t.value;
+					if (f === "in_stock") {
+						Filters.state.in_stock = t.checked;
+					} else {
+						Filters.toggleArray(f, v, t.checked);
+					}
+					Filters.state.page = 1;
+					Filters.scheduleUpdate();
+				}
+
+				if (t.matches("input[data-filter='price_min'], input[data-filter='price_max']")) {
+					var key = t.getAttribute("data-filter");
+					Filters.state[key] = Math.max(0, parseInt(t.value, 10) || 0);
+					if (key === "price_max") {
+						var slider = Filters.sidebar.querySelector("[data-price-slider]");
+						if (slider) slider.value = Filters.state.price_max;
+					}
+					Filters.state.page = 1;
+					Filters.scheduleUpdate();
+				}
+			});
+
+			Filters.sidebar.addEventListener("click", function (e) {
+				var btn = e.target.closest && e.target.closest("[data-filter]");
+				if (!btn) return;
+				if (btn.matches("input")) return;
+				if (btn.disabled || btn.classList.contains("is-disabled")) return;
+
+				var f = btn.getAttribute("data-filter");
+				var v = btn.getAttribute("data-value");
+				if (!f || !v) return;
+
+				e.preventDefault();
+
+				if (f === "foil") {
+					Filters.state.foil = v;
+				} else if (["color", "condition", "lang"].indexOf(f) >= 0) {
+					var pressed = btn.getAttribute("aria-pressed") === "true";
+					Filters.toggleArray(f, v, !pressed);
+				} else {
+					return;
+				}
+				Filters.state.page = 1;
+				Filters.applyStateToUI();
+				Filters.scheduleUpdate();
+			});
+
+			// Slider price_max — input handler para feedback inmediato.
+			var slider = Filters.sidebar.querySelector("[data-price-slider]");
+			if (slider) {
+				slider.addEventListener("input", function () {
+					Filters.state.price_max = parseInt(slider.value, 10) || 0;
+					var pmax = Filters.sidebar.querySelector("[data-filter='price_max']");
+					if (pmax) pmax.value = Filters.state.price_max;
+				});
+				slider.addEventListener("change", function () {
+					Filters.state.page = 1;
+					Filters.scheduleUpdate();
+				});
+			}
+		},
+
+		bindSort: function () {
+			if (!Filters.sort) return;
+			Filters.sort.addEventListener("change", function () {
+				Filters.state.sort = Filters.sort.value;
+				Filters.state.page = 1;
+				Filters.update();
+			});
+		},
+
+		bindPagination: function () {
+			Filters.root.addEventListener("click", function (e) {
+				var btn = e.target.closest && e.target.closest("[data-shop-pagination] [data-page]");
+				if (!btn) return;
+				e.preventDefault();
+				var p = parseInt(btn.getAttribute("data-page"), 10);
+				if (!p || p === Filters.state.page) return;
+				Filters.state.page = p;
+				Filters.update();
+				// Scroll al top del grid.
+				var top = Filters.grid.getBoundingClientRect().top + window.scrollY - 100;
+				window.scrollTo({ top: top, behavior: "smooth" });
+			});
+		},
+
+		bindChips: function () {
+			Filters.root.addEventListener("click", function (e) {
+				if (!e.target.closest) return;
+				if (e.target.closest("[data-chip-clear]")) {
+					Filters.clearAll();
+					return;
+				}
+				var chip = e.target.closest("[data-chip-group]");
+				if (!chip) return;
+				e.preventDefault();
+				var g = chip.getAttribute("data-chip-group");
+				var v = chip.getAttribute("data-chip-value");
+				if (g === "foil") {
+					Filters.state.foil = "all";
+				} else {
+					Filters.toggleArray(g, v, false);
+				}
+				Filters.state.page = 1;
+				Filters.applyStateToUI();
+				Filters.update();
+			});
+		},
+
+		bindGroupHeaders: function () {
+			Filters.sidebar.addEventListener("click", function (e) {
+				var head = e.target.closest && e.target.closest(".filter-group__head");
+				if (!head) return;
+				var open = head.getAttribute("aria-expanded") === "true";
+				head.setAttribute("aria-expanded", open ? "false" : "true");
+			});
+		},
+
+		bindSetSearch: function () {
+			var input = Filters.sidebar.querySelector("[data-set-search]");
+			var list = Filters.sidebar.querySelector("[data-set-list]");
+			if (!input || !list) return;
+			input.addEventListener("input", function () {
+				var q = input.value.trim().toLowerCase();
+				var items = list.querySelectorAll("[data-set-item]");
+				items.forEach(function (item) {
+					var name = item.getAttribute("data-set-name") || "";
+					item.style.display = !q || name.indexOf(q) >= 0 ? "" : "none";
+				});
+			});
+		},
+
+		// ── Helpers ───────────────────────────────────
+		toggleArray: function (key, value, on) {
+			var arr = Filters.state[key];
+			var idx = arr.indexOf(value);
+			if (on && idx < 0) arr.push(value);
+			if (!on && idx >= 0) arr.splice(idx, 1);
+		},
+
+		clearAll: function () {
+			Filters.state = Filters.defaultState();
+			Filters.applyStateToUI();
+			Filters.update();
+		},
+
+		scheduleUpdate: function () {
+			clearTimeout(Filters.debounceTimer);
+			Filters.debounceTimer = setTimeout(Filters.update, Filters.debounceMs);
+		},
+
+		// ── Fetch ────────────────────────────────────
+		buildQuery: function () {
+			var p = new URLSearchParams();
+			p.set("action", "onplay_filter");
+			p.set("nonce", window.onplayFilters.nonce);
+			["set", "color", "rarity", "condition", "lang"].forEach(function (k) {
+				Filters.state[k].forEach(function (v) { p.append(k + "[]", v); });
+			});
+			p.set("foil", Filters.state.foil);
+			p.set("price_min", String(Filters.state.price_min || 0));
+			p.set("price_max", String(Filters.state.price_max || 0));
+			p.set("in_stock", Filters.state.in_stock ? "1" : "0");
+			p.set("sort", Filters.state.sort);
+			p.set("page", String(Filters.state.page));
+			return p.toString();
+		},
+
+		update: function () {
+			Filters.writeStateToURL(true);
+			Filters.fetch();
+		},
+
+		fetch: function () {
+			if (Filters.controller) Filters.controller.abort();
+			Filters.controller = new AbortController();
+
+			Filters.setLoading(true);
+
+			var url = window.onplayFilters.ajaxUrl + "?" + Filters.buildQuery();
+
+			fetch(url, {
+				method: "GET",
+				credentials: "same-origin",
+				headers: { "X-Requested-With": "XMLHttpRequest" },
+				signal: Filters.controller.signal,
+			})
+				.then(function (res) {
+					if (!res.ok) throw new Error("HTTP " + res.status);
+					return res.json();
+				})
+				.then(function (data) {
+					if (!data || !data.success) throw new Error("bad payload");
+					var d = data.data;
+					Filters.grid.innerHTML = d.html;
+					Filters.pagination.innerHTML = d.pagination_html;
+					Filters.chips.innerHTML = d.chips_html;
+					if (Filters.count) Filters.count.textContent = String(d.total_groups);
+					Filters.setLoading(false);
+				})
+				.catch(function (err) {
+					if (err.name === "AbortError") return;
+					console.error("[onplay] filter fetch failed", err);
+					Filters.setLoading(false);
+				});
+		},
+
+		setLoading: function (on) {
+			if (Filters.loading) {
+				if (on) Filters.loading.removeAttribute("hidden");
+				else Filters.loading.setAttribute("hidden", "");
+			}
+			if (Filters.grid) Filters.grid.classList.toggle("is-loading", !!on);
+		},
+
+		onPopState: function (e) {
+			Filters.state = Filters.readStateFromURL();
+			Filters.applyStateToUI();
+			Filters.fetch();
+		},
+	};
+
 	window.onplay.cart = Cart;
 	window.onplay.variantTable = VariantTable;
 	window.onplay.search = Search;
+	window.onplay.filters = Filters;
 
 	window.onplay.ready(function () {
 		document.documentElement.classList.add("onplay-ready");
 		Cart.init();
 		VariantTable.init();
 		Search.init();
+		Filters.init();
 
 		// Click en el botón "Carrito" del header → abre drawer (sin navegar).
 		document.addEventListener("click", function (e) {

@@ -23,3 +23,5 @@ require_once ONPLAY_THEME_DIR . '/inc/woocommerce.php';
 require_once ONPLAY_THEME_DIR . '/inc/variants-query.php';
 require_once ONPLAY_THEME_DIR . '/inc/cart-drawer.php';
 require_once ONPLAY_THEME_DIR . '/inc/search.php';
+require_once ONPLAY_THEME_DIR . '/inc/listing-grouping.php';
+require_once ONPLAY_THEME_DIR . '/inc/filters-ajax.php';
