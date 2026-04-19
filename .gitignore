@@ -12,6 +12,7 @@ wp-content/themes/onplay/assets/dist/*.css.map
 
 # Design file bundle (material de referencia, no código)
 .design-file/
+Onplay.cl/
 
 # WordPress / local
 wp-config.php
