@@ -139,6 +139,165 @@
 	};
 
 	// ──────────────────────────────────────────────────────────
+	// Cart update — stepper (+/−/set) + remove (Módulo 7)
+	// Endpoint propio admin-ajax.php?action=onplay_cart_update
+	// Delegación global: cualquier [data-cart-action] dentro de un
+	// [data-cart-row] con [data-cart-item-key] funciona, así que sirve
+	// para el drawer y para la página /carrito/ sin bindings separados.
+	// ──────────────────────────────────────────────────────────
+	var CartUpdate = {
+		init: function () {
+			if (!window.onplayCart || !window.onplayCart.ajaxUrl) return;
+
+			document.addEventListener("click", function (e) {
+				var btn = e.target.closest && e.target.closest("[data-cart-action]");
+				if (!btn) return;
+				var row = btn.closest("[data-cart-row]");
+				if (!row) return;
+				var action = btn.getAttribute("data-cart-action");
+				if (!action) return;
+				e.preventDefault();
+
+				if (action === "remove") {
+					CartUpdate.send(row, "remove");
+					return;
+				}
+				if (action === "increase" || action === "decrease") {
+					CartUpdate.send(row, action);
+					return;
+				}
+			});
+
+			// Cambio directo en el input: action=set (blur o Enter).
+			document.addEventListener(
+				"change",
+				function (e) {
+					var input = e.target;
+					if (!input || !input.matches || !input.matches("[data-cart-qty]")) return;
+					var row = input.closest("[data-cart-row]");
+					if (!row) return;
+					var qty = parseInt(input.value, 10);
+					if (isNaN(qty) || qty < 0) qty = 0;
+					CartUpdate.send(row, "set", qty);
+				},
+				true
+			);
+		},
+
+		/**
+		 * @param {HTMLElement} row    elemento con data-cart-item-key
+		 * @param {string}      action increase|decrease|set|remove
+		 * @param {number}      [qty]  solo para 'set'
+		 */
+		send: function (row, action, qty) {
+			var key = row.getAttribute("data-cart-item-key");
+			if (!key) return;
+
+			row.classList.add("is-updating");
+			CartUpdate.disableRow(row, true);
+
+			var body = new FormData();
+			body.append("action", "onplay_cart_update");
+			body.append("nonce", window.onplayCart.nonce);
+			body.append("cart_action", action);
+			body.append("cart_item_key", key);
+			if (action === "set") body.append("qty", String(qty || 0));
+
+			fetch(window.onplayCart.ajaxUrl, {
+				method: "POST",
+				credentials: "same-origin",
+				body: body,
+				headers: { "X-Requested-With": "XMLHttpRequest" },
+			})
+				.then(function (res) {
+					return res.json().then(function (data) {
+						return { ok: res.ok, data: data };
+					});
+				})
+				.then(function (r) {
+					if (!r.ok || !r.data || !r.data.success) {
+						var msg =
+							(r.data && r.data.data && r.data.data.message) ||
+							window.onplayCart.i18n.updateError;
+						CartUpdate.showRowError(row, msg);
+						return;
+					}
+					var payload = r.data.data || {};
+					if (payload.fragments) {
+						Cart.applyFragments(payload.fragments);
+					}
+					if (payload.cart) {
+						CartUpdate.applyCartPayload(payload.cart);
+					}
+					document.body.dispatchEvent(
+						new CustomEvent("onplay_cart_updated", { detail: payload })
+					);
+				})
+				.catch(function (err) {
+					console.error("[onplay] cart update failed", err);
+					CartUpdate.showRowError(row, window.onplayCart.i18n.updateError);
+				})
+				.finally(function () {
+					row.classList.remove("is-updating");
+					CartUpdate.disableRow(row, false);
+				});
+		},
+
+		/**
+		 * Aplica el payload plano a filas que NO fueron reemplazadas por fragments
+		 * (ej. filas de la página /carrito/ que no matchean selectores del drawer).
+		 */
+		applyCartPayload: function (cart) {
+			if (!cart || !cart.items) return;
+			var rows = document.querySelectorAll("[data-cart-row]");
+			rows.forEach(function (row) {
+				var key = row.getAttribute("data-cart-item-key");
+				if (!key) return;
+				var entry = cart.items[key];
+				if (!entry) {
+					// Item removido → sacar la fila si sigue en DOM.
+					if (row.parentNode) row.parentNode.removeChild(row);
+					return;
+				}
+				var qtyInput = row.querySelector("[data-cart-qty]");
+				if (qtyInput && parseInt(qtyInput.value, 10) !== entry.qty) {
+					qtyInput.value = String(entry.qty);
+				}
+				var sub = row.querySelector("[data-cart-line-sub]");
+				if (sub) sub.textContent = entry.subtotal;
+			});
+
+			// Subtotal global (header sticky en /carrito/).
+			var globalSub = document.querySelector("[data-cart-global-sub]");
+			if (globalSub) globalSub.textContent = cart.subtotal;
+			var globalCount = document.querySelector("[data-cart-global-count]");
+			if (globalCount) globalCount.textContent = String(cart.item_count);
+		},
+
+		disableRow: function (row, on) {
+			var ctrls = row.querySelectorAll(
+				"[data-cart-action],[data-cart-qty]"
+			);
+			ctrls.forEach(function (el) {
+				el.disabled = !!on;
+			});
+		},
+
+		showRowError: function (row, msg) {
+			var existing = row.querySelector(".cart-row__error");
+			if (existing) existing.remove();
+			var note = document.createElement("div");
+			note.className = "cart-row__error";
+			note.textContent = msg;
+			note.setAttribute("role", "alert");
+			row.appendChild(note);
+			setTimeout(function () {
+				if (note.parentNode) note.parentNode.removeChild(note);
+			}, 4000);
+		},
+	};
+
+	// ──────────────────────────────────────────────────────────
 	// Variant table — handlers de "Agregar" + filtros chips
 	// ──────────────────────────────────────────────────────────
 	var VariantTable = {
@@ -844,6 +1003,7 @@
 	};
 
 	window.onplay.cart = Cart;
+	window.onplay.cartUpdate = CartUpdate;
 	window.onplay.variantTable = VariantTable;
 	window.onplay.search = Search;
 	window.onplay.filters = Filters;
@@ -851,6 +1011,7 @@
 	window.onplay.ready(function () {
 		document.documentElement.classList.add("onplay-ready");
 		Cart.init();
+		CartUpdate.init();
 		VariantTable.init();
 		Search.init();
 		Filters.init();
