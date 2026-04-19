@@ -13,8 +13,12 @@
 		<div class="site-footer__grid">
 
 			<div class="site-footer__brand">
-				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
-					<img src="<?php echo esc_url( ONPLAY_THEME_URI . '/assets/img/logo.png' ); ?>" alt="Onplay Games" style="height:60px;width:auto;" />
+				<a class="site-footer__brand-lockup" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
+					<img src="<?php echo esc_url( ONPLAY_THEME_URI . '/assets/img/logo.png' ); ?>" alt="Onplay Games" />
+					<div class="site-footer__brand-meta">
+						<div class="site-footer__brand-kicker"><?php esc_html_e( 'Singles', 'onplay' ); ?></div>
+						<div class="site-footer__brand-title">ONPLAY<span class="is-accent">.</span>CL</div>
+					</div>
 				</a>
 				<p><?php esc_html_e( 'La tienda especializada en singles de TCG en Chile. Operada por Onplay Games desde Santiago Centro.', 'onplay' ); ?></p>
 				<div class="site-footer__socials" aria-label="<?php esc_attr_e( 'Redes sociales', 'onplay' ); ?>">
@@ -77,6 +81,8 @@
 
 	</div>
 </footer>
+
+<?php get_template_part( 'template-parts/cart-drawer' ); ?>
 
 <?php wp_footer(); ?>
 </body>

@@ -46,7 +46,13 @@
 				</div>
 			</a>
 
-			<form role="search" method="get" class="site-header__search" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+			<form
+				role="search"
+				method="get"
+				class="site-header__search"
+				action="<?php echo esc_url( home_url( '/' ) ); ?>"
+				data-onplay-search
+			>
 				<svg class="site-header__search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 					<circle cx="11" cy="11" r="8"/>
 					<path d="m21 21-4.3-4.3"/>
@@ -60,8 +66,22 @@
 					placeholder="<?php esc_attr_e( 'Buscar cartas, sets, ediciones…  (ej: Lightning Bolt, MH3)', 'onplay' ); ?>"
 					value="<?php echo esc_attr( get_search_query() ); ?>"
 					autocomplete="off"
+					role="combobox"
+					aria-expanded="false"
+					aria-autocomplete="list"
+					aria-controls="onplay-search-results"
+					aria-haspopup="listbox"
+					data-onplay-search-input
 				/>
 				<span class="site-header__search-hint" aria-hidden="true">⌘K</span>
+				<div
+					id="onplay-search-results"
+					class="site-header__search-results"
+					role="listbox"
+					aria-label="<?php esc_attr_e( 'Resultados de búsqueda', 'onplay' ); ?>"
+					data-onplay-search-results
+					hidden
+				></div>
 			</form>
 
 			<nav class="site-header__nav" aria-label="<?php esc_attr_e( 'Juegos', 'onplay' ); ?>">
@@ -102,14 +122,18 @@
 				$cart_url   = function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/carrito/' );
 				$cart_count = function_exists( 'WC' ) && WC()->cart ? WC()->cart->get_cart_contents_count() : 0;
 				?>
-				<a class="btn btn-secondary" href="<?php echo esc_url( $cart_url ); ?>" aria-label="<?php esc_attr_e( 'Carrito', 'onplay' ); ?>">
+				<a class="btn btn-secondary" href="<?php echo esc_url( $cart_url ); ?>" aria-label="<?php esc_attr_e( 'Carrito', 'onplay' ); ?>" data-onplay-cart-trigger>
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 						<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
 						<path d="M3 6h18"/>
 						<path d="M16 10a4 4 0 0 1-8 0"/>
 					</svg>
 					<?php esc_html_e( 'Carrito', 'onplay' ); ?>
-					<span class="site-header__cart-badge" data-onplay-cart-count><?php echo (int) $cart_count; ?></span>
+					<?php if ( $cart_count > 0 ) : ?>
+						<span class="site-header__cart-badge" data-onplay-cart-count><?php echo (int) $cart_count; ?></span>
+					<?php else : ?>
+						<span class="site-header__cart-badge is-hidden" data-onplay-cart-count hidden>0</span>
+					<?php endif; ?>
 				</a>
 			</div>
 

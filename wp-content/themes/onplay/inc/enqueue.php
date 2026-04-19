@@ -35,6 +35,37 @@ add_action(
 			$js_ver,
 			true
 		);
+
+		// Variables AJAX para WooCommerce nativo + drawer.
+		if ( function_exists( 'WC' ) ) {
+			wp_localize_script(
+				'onplay-main',
+				'onplayWC',
+				array(
+					'ajaxUrl'      => esc_url_raw( WC_AJAX::get_endpoint( '%%endpoint%%' ) ),
+					'cartUrl'      => esc_url_raw( wc_get_cart_url() ),
+					'checkoutUrl'  => esc_url_raw( wc_get_checkout_url() ),
+					'i18n'         => array(
+						'addError'  => __( 'No pudimos agregar la carta. Intenta de nuevo.', 'onplay' ),
+						'added'     => __( 'Agregado al carrito', 'onplay' ),
+					),
+				)
+			);
+		}
+
+		// Endpoint del autocomplete de búsqueda.
+		wp_localize_script(
+			'onplay-main',
+			'onplaySearch',
+			array(
+				'ajaxUrl' => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
+				'nonce'   => wp_create_nonce( 'onplay_search' ),
+				'i18n'    => array(
+					'noResults' => __( 'Sin resultados locales', 'onplay' ),
+					'fromLabel' => __( 'Desde', 'onplay' ),
+				),
+			)
+		);
 	}
 );
 

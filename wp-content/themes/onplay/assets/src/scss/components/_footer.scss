@@ -32,6 +32,44 @@
 			max-width: 280px;
 			line-height: 1.6;
 		}
+
+		&-lockup {
+			display: inline-flex;
+			align-items: center;
+			gap: 12px;
+
+			img {
+				height: 60px;
+				width: auto;
+				object-fit: contain;
+			}
+		}
+
+		&-meta {
+			line-height: 0.85;
+			border-left: 1px solid var(--line-2);
+			padding-left: 12px;
+		}
+
+		&-kicker {
+			font-family: var(--body);
+			font-size: 11px;
+			letter-spacing: 0.28em;
+			color: var(--mid-2);
+			text-transform: uppercase;
+		}
+
+		&-title {
+			font-family: var(--display);
+			font-size: 24px;
+			letter-spacing: 0.04em;
+			color: var(--bone);
+			margin-top: 4px;
+
+			.is-accent {
+				color: var(--carmesi);
+			}
+		}
 	}
 
 	&__socials {

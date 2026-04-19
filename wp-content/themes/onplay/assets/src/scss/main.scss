@@ -11,8 +11,15 @@
 @use "components/input";
 @use "components/badge";
 @use "components/card-product";
+@use "components/mana-symbols";
 @use "components/header";
 @use "components/footer";
+@use "components/variant-table";
+@use "components/cart-drawer";
+@use "components/search-autocomplete";
+
+@use "templates/shop";
+@use "templates/single-product";
 
 // Transición de entrada (reutilizable)
 .screen-enter {
