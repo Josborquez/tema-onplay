@@ -298,6 +298,114 @@
 	};
 
 	// ──────────────────────────────────────────────────────────
+	// Checkout — RUT chileno (Módulo 8)
+	// Valida módulo 11 en blur y bloquea submit con RUT inválido.
+	// Formatea a "12.345.678-K" al salir del campo.
+	// Mirror del validador PHP en inc/checkout-rut.php.
+	// ──────────────────────────────────────────────────────────
+	var CheckoutRut = {
+		init: function () {
+			document.addEventListener("blur", CheckoutRut.onBlur, true);
+			document.addEventListener("input", CheckoutRut.onInput, true);
+			document.addEventListener("submit", CheckoutRut.onSubmit, true);
+		},
+
+		getInput: function (root) {
+			var scope = root || document;
+			return scope.querySelector("[data-onplay-rut]");
+		},
+
+		normalize: function (raw) {
+			return String(raw || "")
+				.toUpperCase()
+				.replace(/[^0-9K]/g, "");
+		},
+
+		format: function (raw) {
+			var clean = CheckoutRut.normalize(raw);
+			if (clean.length < 2) return clean;
+			var dv = clean.slice(-1);
+			var digits = clean.slice(0, -1);
+			digits = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+			return digits + "-" + dv;
+		},
+
+		validate: function (raw) {
+			var clean = CheckoutRut.normalize(raw);
+			if (clean.length < 8 || clean.length > 9) return false;
+			var dv = clean.slice(-1);
+			var digits = clean.slice(0, -1);
+			if (!/^\d+$/.test(digits)) return false;
+
+			var sum = 0;
+			var mult = 2;
+			for (var i = digits.length - 1; i >= 0; i--) {
+				sum += parseInt(digits[i], 10) * mult;
+				mult = mult === 7 ? 2 : mult + 1;
+			}
+			var mod = 11 - (sum % 11);
+			var expected =
+				mod === 11 ? "0" : mod === 10 ? "K" : String(mod);
+			return expected === dv;
+		},
+
+		onInput: function (e) {
+			var input = e.target;
+			if (!input || !input.matches || !input.matches("[data-onplay-rut]")) return;
+			// Limpiar error al editar.
+			CheckoutRut.setFieldState(input, "neutral");
+		},
+
+		onBlur: function (e) {
+			var input = e.target;
+			if (!input || !input.matches || !input.matches("[data-onplay-rut]")) return;
+			var raw = input.value.trim();
+			if (raw === "") {
+				CheckoutRut.setFieldState(input, "neutral");
+				return;
+			}
+			input.value = CheckoutRut.format(raw);
+			var ok = CheckoutRut.validate(raw);
+			CheckoutRut.setFieldState(input, ok ? "valid" : "invalid");
+		},
+
+		onSubmit: function (e) {
+			var form = e.target;
+			if (!form || !form.matches || !form.matches("form.checkout, form.woocommerce-checkout")) return;
+			var input = CheckoutRut.getInput(form);
+			if (!input) return;
+			var raw = input.value.trim();
+			if (raw !== "" && !CheckoutRut.validate(raw)) {
+				e.preventDefault();
+				e.stopPropagation();
+				CheckoutRut.setFieldState(input, "invalid");
+				input.focus();
+				input.scrollIntoView({ behavior: "smooth", block: "center" });
+			}
+		},
+
+		setFieldState: function (input, state) {
+			var row = input.closest(".form-row, .onplay-rut-field");
+			if (!row) return;
+			row.classList.remove("is-rut-valid", "is-rut-invalid");
+			if (state === "valid") row.classList.add("is-rut-valid");
+			if (state === "invalid") row.classList.add("is-rut-invalid");
+			var note = row.querySelector(".onplay-rut-msg");
+			if (state === "invalid") {
+				if (!note) {
+					note = document.createElement("div");
+					note.className = "onplay-rut-msg";
+					note.setAttribute("role", "alert");
+					row.appendChild(note);
+				}
+				note.textContent = "El RUT ingresado no es válido.";
+			} else if (note) {
+				note.remove();
+			}
+		},
+	};
+
+	// ──────────────────────────────────────────────────────────
 	// Variant table — handlers de "Agregar" + filtros chips
 	// ──────────────────────────────────────────────────────────
 	var VariantTable = {
@@ -1004,6 +1112,7 @@
 
 	window.onplay.cart = Cart;
 	window.onplay.cartUpdate = CartUpdate;
+	window.onplay.checkoutRut = CheckoutRut;
 	window.onplay.variantTable = VariantTable;
 	window.onplay.search = Search;
 	window.onplay.filters = Filters;
@@ -1012,6 +1121,7 @@
 		document.documentElement.classList.add("onplay-ready");
 		Cart.init();
 		CartUpdate.init();
+		CheckoutRut.init();
 		VariantTable.init();
 		Search.init();
 		Filters.init();
