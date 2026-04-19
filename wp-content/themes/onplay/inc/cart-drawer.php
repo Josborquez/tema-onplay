@@ -48,7 +48,7 @@ function onplay_render_cart_drawer_body() {
 			</div>
 		<?php else : ?>
 			<ul class="cart-drawer__items">
-				<?php foreach ( $items as $item ) :
+				<?php foreach ( $items as $key => $item ) :
 					$product = isset( $item['data'] ) ? $item['data'] : null;
 					if ( ! $product instanceof WC_Product ) {
 						continue;
@@ -62,6 +62,7 @@ function onplay_render_cart_drawer_body() {
 					$line_sub  = (float) $product->get_price() * $qty;
 					$title_raw = (string) $product->get_name();
 					$title     = trim( preg_replace( '/\s*\(Foil\)\s*/i', '', $title_raw ) );
+					$stock_max = $product->managing_stock() ? (int) $product->get_stock_quantity() : 0;
 
 					$variant_bits = array();
 					if ( $parts['condition'] ) {
@@ -74,7 +75,7 @@ function onplay_render_cart_drawer_body() {
 						$variant_bits[] = __( 'Foil', 'onplay' );
 					}
 					?>
-					<li class="cart-drawer__item">
+					<li class="cart-drawer__item" data-cart-row data-cart-item-key="<?php echo esc_attr( $key ); ?>">
 						<div class="cart-drawer__item-thumb">
 							<?php
 							if ( $thumb ) {
@@ -83,13 +84,46 @@ function onplay_render_cart_drawer_body() {
 							?>
 						</div>
 						<div class="cart-drawer__item-meta">
-							<div class="cart-drawer__item-title"><?php echo esc_html( $title ); ?></div>
+							<div class="cart-drawer__item-head">
+								<div class="cart-drawer__item-title"><?php echo esc_html( $title ); ?></div>
+								<button
+									type="button"
+									class="cart-drawer__item-remove"
+									data-cart-action="remove"
+									aria-label="<?php esc_attr_e( 'Quitar del carrito', 'onplay' ); ?>"
+								>&times;</button>
+							</div>
 							<?php if ( ! empty( $variant_bits ) ) : ?>
 								<div class="cart-drawer__item-variant mono"><?php echo esc_html( implode( ' · ', $variant_bits ) ); ?></div>
 							<?php endif; ?>
 							<div class="cart-drawer__item-line">
-								<span class="cart-drawer__item-qty mono">×<?php echo (int) $qty; ?></span>
-								<span class="cart-drawer__item-sub"><?php echo esc_html( onplay_format_clp( $line_sub ) ); ?></span>
+								<div class="cart-drawer__stepper" role="group" aria-label="<?php esc_attr_e( 'Cantidad', 'onplay' ); ?>">
+									<button
+										type="button"
+										class="cart-drawer__stepper-btn"
+										data-cart-action="decrease"
+										aria-label="<?php esc_attr_e( 'Disminuir cantidad', 'onplay' ); ?>"
+										<?php disabled( $qty, 1 ); ?>
+									>&minus;</button>
+									<input
+										type="number"
+										class="cart-drawer__stepper-input mono"
+										data-cart-qty
+										value="<?php echo (int) $qty; ?>"
+										min="1"
+										<?php if ( $stock_max > 0 ) : ?>max="<?php echo (int) $stock_max; ?>"<?php endif; ?>
+										inputmode="numeric"
+										aria-label="<?php esc_attr_e( 'Cantidad', 'onplay' ); ?>"
+									/>
+									<button
+										type="button"
+										class="cart-drawer__stepper-btn"
+										data-cart-action="increase"
+										aria-label="<?php esc_attr_e( 'Aumentar cantidad', 'onplay' ); ?>"
+										<?php if ( $stock_max > 0 && $qty >= $stock_max ) echo 'disabled'; ?>
+									>+</button>
+								</div>
+								<span class="cart-drawer__item-sub" data-cart-line-sub><?php echo esc_html( onplay_format_clp( $line_sub ) ); ?></span>
 							</div>
 						</div>
 					</li>

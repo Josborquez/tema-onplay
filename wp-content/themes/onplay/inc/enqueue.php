@@ -51,6 +51,21 @@ add_action(
 					),
 				)
 			);
+
+			// Endpoint propio del carrito (drawer + /carrito/).
+			wp_localize_script(
+				'onplay-main',
+				'onplayCart',
+				array(
+					'ajaxUrl' => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
+					'nonce'   => wp_create_nonce( 'onplay_cart' ),
+					'i18n'    => array(
+						'updateError'   => __( 'No pudimos actualizar el carrito. Intenta de nuevo.', 'onplay' ),
+						'removeError'   => __( 'No pudimos quitar el item. Intenta de nuevo.', 'onplay' ),
+						'confirmRemove' => __( '¿Quitar este item del carrito?', 'onplay' ),
+					),
+				)
+			);
 		}
 
 		// Endpoint del autocomplete de búsqueda.
