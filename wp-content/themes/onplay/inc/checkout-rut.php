@@ -135,6 +135,21 @@ add_filter( 'woocommerce_checkout_fields', 'onplay_checkout_fields' );
 add_filter( 'woocommerce_ship_to_different_address_checked', '__return_false' );
 
 /**
+ * Remover el toggle "¿Tienes un cupón?" del header del checkout.
+ * MVP expone cupones solo en /carrito/ (decisión M7) para no duplicar UI.
+ * Rollback: borrar este remove_action.
+ */
+remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
+
+/**
+ * Remover el "Returning customer? Click here to login" del header del checkout.
+ * Guest checkout habilitado (decisión M8) — el usuario que ya tiene cuenta
+ * puede loguearse desde /mi-cuenta/ sin ensuciar el flujo de compra.
+ * Rollback: borrar este remove_action.
+ */
+remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
+
+/**
  * Valida el RUT en backend — corre sí o sí, incluso si el JS no está.
  *
  * @param array    $data
