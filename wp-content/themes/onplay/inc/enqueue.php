@@ -18,17 +18,13 @@ add_action(
 		$css_ver = file_exists( $css_path ) ? filemtime( $css_path ) : ONPLAY_THEME_VERSION;
 		$js_ver  = file_exists( $js_path ) ? filemtime( $js_path ) : ONPLAY_THEME_VERSION;
 
-		wp_enqueue_style(
-			'onplay-fonts',
-			'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap',
-			array(),
-			ONPLAY_THEME_VERSION
-		);
+		// Google Fonts se inyectan directamente en wp_head (ver abajo) porque
+		// esc_url() de WP corta los parámetros duplicados "&family=" del CSS v2.
 
 		wp_enqueue_style(
 			'onplay-main',
 			ONPLAY_THEME_URI . '/assets/dist/style.css',
-			array( 'onplay-fonts' ),
+			array(),
 			$css_ver
 		);
 
@@ -47,6 +43,7 @@ add_action(
 	function () {
 		echo "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n";
 		echo "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n";
+		echo "<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap\">\n";
 	},
 	1
 );
