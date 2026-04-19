@@ -1,4 +1,4 @@
-// Card de producto (shell mínimo — se completa en Módulo 3)
+// Card de producto — paridad con prototipo React (shared.jsx ProductCard)
 
 .card-product {
 	background: var(--carbon);
@@ -9,6 +9,9 @@
 	display: flex;
 	flex-direction: column;
 	position: relative;
+	cursor: pointer;
+	text-decoration: none;
+	color: inherit;
 
 	&:hover {
 		border-color: var(--line-2);
@@ -19,7 +22,6 @@
 		}
 	}
 
-	&__img-wrap,
 	.card-img-wrap {
 		aspect-ratio: 5 / 7;
 		overflow: hidden;
@@ -27,7 +29,6 @@
 		position: relative;
 	}
 
-	&__img,
 	.card-img {
 		width: 100%;
 		height: 100%;
@@ -35,12 +36,131 @@
 		transition: transform var(--t-slow);
 	}
 
-	&__meta,
+	&__pips-tl {
+		position: absolute;
+		top: 8px;
+		left: 8px;
+		display: flex;
+		gap: 4px;
+		z-index: 2;
+
+		.badge {
+			backdrop-filter: blur(8px);
+			background: rgba(10, 10, 10, 0.7);
+		}
+
+		.badge-foil {
+			backdrop-filter: none;
+		}
+	}
+
+	&__colors-br {
+		position: absolute;
+		bottom: 8px;
+		right: 8px;
+		display: flex;
+		gap: 2px;
+		z-index: 2;
+	}
+
 	.card-meta {
 		padding: 10px 12px 12px;
 		display: flex;
 		flex-direction: column;
 		gap: 6px;
 		border-top: 1px solid var(--line);
+	}
+
+	&__title {
+		font-weight: 600;
+		font-size: 13px;
+		color: var(--bone);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__set {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin-top: 3px;
+		font-size: 11px;
+		color: var(--mid-2);
+
+		span {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	&__attrs {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 10px;
+		color: var(--mid-2);
+		letter-spacing: 0.06em;
+
+		.mono {
+			color: var(--bone-2);
+		}
+
+		.sep {
+			color: var(--line-2);
+		}
+
+		.badge {
+			padding: 1px 5px;
+			font-size: 9px;
+		}
+	}
+
+	&__price-row {
+		display: flex;
+		align-items: flex-end;
+		justify-content: space-between;
+		margin-top: 2px;
+	}
+
+	&__price {
+		color: var(--carmesi);
+		font-family: var(--display);
+		font-size: 24px;
+		line-height: 1;
+		letter-spacing: 0.02em;
+	}
+}
+
+.mono {
+	font-family: var(--mono);
+}
+
+// Fallback when image fails
+.card-img-fallback {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	padding: 14px;
+	background: linear-gradient(160deg, var(--carbon-2), var(--black));
+
+	&__name {
+		font-family: var(--display);
+		font-weight: 400;
+		font-size: 18px;
+		color: var(--bone);
+		line-height: 1;
+		text-transform: uppercase;
+	}
+
+	&__meta {
+		font-family: var(--mono);
+		font-size: 10px;
+		color: var(--mid);
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
 	}
 }

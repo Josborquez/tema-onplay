@@ -1,0 +1,97 @@
+// Archive / shop listing
+
+.shop-main {
+	padding: var(--space-10) 0 var(--space-16);
+}
+
+.shop-header {
+	margin-bottom: var(--space-8);
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: var(--space-4);
+
+	&__kicker {
+		font-family: var(--mono);
+		font-size: 11px;
+		letter-spacing: 0.16em;
+		color: var(--carmesi);
+		text-transform: uppercase;
+		margin-bottom: var(--space-1);
+	}
+
+	&__title {
+		font-family: var(--display);
+		font-size: clamp(36px, 5vw, 56px);
+		line-height: 0.95;
+		text-transform: uppercase;
+		color: var(--bone);
+	}
+
+	&__count {
+		font-family: var(--mono);
+		font-size: 12px;
+		color: var(--mid-2);
+		letter-spacing: 0.08em;
+	}
+}
+
+.shop-grid {
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	gap: var(--space-4);
+
+	@media (max-width: 1200px) {
+		grid-template-columns: repeat(4, 1fr);
+	}
+
+	@media (max-width: 720px) {
+		grid-template-columns: repeat(2, 1fr);
+		gap: var(--space-3);
+	}
+}
+
+.shop-empty {
+	padding: var(--space-20) var(--space-6);
+	text-align: center;
+	color: var(--mid-2);
+	font-size: 14px;
+}
+
+.shop-pagination {
+	margin-top: var(--space-10);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: var(--space-2);
+
+	a,
+	span {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 36px;
+		height: 36px;
+		padding: 0 var(--space-3);
+		border: 1px solid var(--line);
+		background: var(--carbon);
+		color: var(--bone-2);
+		font-family: var(--mono);
+		font-size: 13px;
+		text-decoration: none;
+		border-radius: var(--radius-xs);
+		transition: all var(--t-fast);
+
+		&:hover {
+			border-color: var(--line-2);
+			color: var(--bone);
+		}
+	}
+
+	.current {
+		background: var(--carmesi);
+		border-color: var(--carmesi);
+		color: #fff;
+	}
+}
