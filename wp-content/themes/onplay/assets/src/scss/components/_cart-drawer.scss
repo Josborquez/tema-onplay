@@ -1,0 +1,233 @@
+// Cart drawer — versión mínima Módulo 4.
+// Operaciones avanzadas (sumar/restar/eliminar) se agregan en Módulo 7.
+
+.cart-drawer {
+	position: fixed;
+	inset: 0;
+	z-index: var(--z-drawer);
+	pointer-events: none;
+
+	&[aria-hidden="false"] {
+		pointer-events: auto;
+	}
+
+	&__backdrop {
+		position: absolute;
+		inset: 0;
+		background: rgba(10, 10, 10, 0.6);
+		opacity: 0;
+		transition: opacity var(--t-base);
+		backdrop-filter: blur(2px);
+	}
+
+	&__panel {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		width: 100%;
+		max-width: 420px;
+		background: var(--carbon);
+		border-left: 1px solid var(--line);
+		display: flex;
+		flex-direction: column;
+		transform: translateX(100%);
+		transition: transform var(--t-slow);
+		box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
+	}
+
+	&[aria-hidden="false"] &__backdrop {
+		opacity: 1;
+	}
+
+	&[aria-hidden="false"] &__panel {
+		transform: translateX(0);
+	}
+
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: var(--space-5) var(--space-5);
+		border-bottom: 1px solid var(--line);
+		flex-shrink: 0;
+	}
+
+	&__title {
+		font-family: var(--display);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		font-size: 22px;
+		margin: 0;
+	}
+
+	&__close {
+		appearance: none;
+		background: transparent;
+		border: 1px solid var(--line);
+		color: var(--bone);
+		width: 36px;
+		height: 36px;
+		border-radius: var(--radius-sm);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all var(--t-fast);
+
+		&:hover {
+			border-color: var(--line-2);
+			background: var(--carbon-2);
+		}
+	}
+
+	&__body {
+		flex: 1;
+		overflow-y: auto;
+		padding: var(--space-4) var(--space-5);
+	}
+
+	&__empty,
+	&__footer-empty {
+		text-align: center;
+		color: var(--mid-2);
+		padding: var(--space-12) var(--space-4);
+		font-size: 14px;
+	}
+
+	&__items {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+
+	&__item {
+		display: grid;
+		grid-template-columns: 60px 1fr;
+		gap: var(--space-3);
+		padding-bottom: var(--space-4);
+		border-bottom: 1px solid var(--line);
+
+		&:last-child {
+			border-bottom: none;
+			padding-bottom: 0;
+		}
+	}
+
+	&__item-thumb {
+		width: 60px;
+		aspect-ratio: 5 / 7;
+		background: var(--black);
+		border-radius: var(--radius-sm);
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
+	&__item-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
+	}
+
+	&__item-title {
+		font-weight: 500;
+		font-size: 14px;
+		line-height: 1.3;
+		color: var(--bone);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__item-variant {
+		font-size: 11px;
+		color: var(--mid-2);
+		letter-spacing: 0.04em;
+	}
+
+	&__item-line {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		margin-top: var(--space-2);
+	}
+
+	&__item-qty {
+		font-size: 13px;
+		color: var(--mid-2);
+	}
+
+	&__item-sub {
+		font-family: var(--mono);
+		font-weight: 600;
+		color: var(--bone);
+	}
+
+	&__footer {
+		flex-shrink: 0;
+		border-top: 1px solid var(--line);
+		padding: var(--space-5);
+		background: var(--carbon-2);
+	}
+
+	&__totals {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	&__subtotal-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		font-size: 14px;
+
+		span:first-child {
+			color: var(--mid-2);
+			text-transform: uppercase;
+			letter-spacing: 0.08em;
+			font-size: 12px;
+		}
+	}
+
+	&__subtotal-amount {
+		font-family: var(--mono);
+		font-size: 22px;
+		font-weight: 600;
+		color: var(--bone);
+	}
+
+	&__hint {
+		font-size: 11px;
+		color: var(--mid);
+		line-height: 1.4;
+	}
+
+	&__ctas {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-2);
+		margin-top: var(--space-2);
+
+		.btn {
+			justify-content: center;
+		}
+	}
+}
+
+// Lock body scroll cuando el drawer está abierto.
+html.is-cart-open {
+	overflow: hidden;
+}
