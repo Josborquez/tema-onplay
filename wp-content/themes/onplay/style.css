@@ -1,0 +1,21 @@
+/*
+Theme Name: Onplay
+Theme URI: https://onplay.cl
+Author: Onplay Games SpA
+Author URI: https://onplay.cl
+Description: Tema custom para onplay.cl — tienda especializada en singles de Magic: The Gathering y futuros TCGs. Dark UI carmesí/black con acento de Bebas Neue. No es child theme.
+Version: 0.1.0
+Requires at least: 6.5
+Requires PHP: 8.1
+License: GPL-2.0-or-later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: onplay
+Tags: woocommerce, e-commerce, dark-mode, custom-theme, tcg
+*/
+
+/*
+ * El CSS compilado del tema vive en assets/dist/style.css.
+ * Este archivo existe únicamente por requerimiento de WordPress
+ * (necesita un style.css con el header del tema en la raíz del tema).
+ * NO editar este archivo — editar las fuentes en assets/src/scss/.
+ */

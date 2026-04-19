@@ -1,0 +1,40 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build output
+wp-content/themes/onplay/assets/dist/*.map
+wp-content/themes/onplay/assets/dist/*.css.map
+.sass-cache/
+
+# Design file bundle (material de referencia, no código)
+.design-file/
+
+# WordPress / local
+wp-config.php
+wp-content/uploads/
+wp-content/cache/
+wp-content/debug.log
+wp-content/upgrade/
+wp-content/backups/
+
+# Credenciales
+.env
+.env.*
+!.env.example
+
+# Editores / SO
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# PHP
+vendor/
+composer.phar
