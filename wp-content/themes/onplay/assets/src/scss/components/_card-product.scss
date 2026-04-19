@@ -131,6 +131,33 @@
 		line-height: 1;
 		letter-spacing: 0.02em;
 	}
+
+	// Listado agrupado (Módulo 6) — "desde $X.XXX" + "+N variantes".
+	&__price-wrap {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		align-items: flex-start;
+	}
+
+	&__price-from {
+		font-family: var(--mono);
+		font-size: 9px;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: var(--mid);
+	}
+
+	&__variant-badge {
+		font-size: 10px;
+		color: var(--bone-2);
+		background: var(--carbon-3);
+		border: 1px solid var(--line-2);
+		border-radius: var(--radius-xs);
+		padding: 2px 6px;
+		letter-spacing: 0.04em;
+		white-space: nowrap;
+	}
 }
 
 .mono {

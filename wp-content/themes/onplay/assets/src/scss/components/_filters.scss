@@ -1,0 +1,358 @@
+// Sidebar de filtros del listado (Módulo 6).
+// Vive en .shop-sidebar; estilos generales del layout en templates/_shop.scss.
+
+.shop-sidebar {
+	display: flex;
+	flex-direction: column;
+	position: sticky;
+	top: var(--space-12);
+	align-self: flex-start;
+	max-height: calc(100vh - var(--space-14));
+	overflow-y: auto;
+	padding-right: var(--space-2);
+
+	// Scrollbar discreta sobre dark.
+	scrollbar-width: thin;
+	scrollbar-color: var(--line-2) transparent;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+	&::-webkit-scrollbar-thumb {
+		background: var(--line-2);
+		border-radius: var(--radius-full);
+	}
+}
+
+.filter-group {
+	border-bottom: 1px solid var(--line);
+	padding: var(--space-3) 0;
+
+	&:first-child {
+		padding-top: 0;
+	}
+
+	&__head {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 100%;
+		padding: var(--space-1) 0 var(--space-3);
+		background: transparent;
+		border: 0;
+		color: var(--bone);
+		font-family: var(--display);
+		font-size: 13px;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		cursor: pointer;
+	}
+
+	&__chev {
+		color: var(--mid);
+		font-size: 10px;
+		transition: transform var(--t-fast);
+	}
+
+	&__head[aria-expanded="false"] {
+		padding-bottom: var(--space-1);
+	}
+
+	&__head[aria-expanded="false"] .filter-group__chev {
+		transform: rotate(-90deg);
+	}
+
+	&__head[aria-expanded="false"] + &__body {
+		display: none;
+	}
+}
+
+// Color chips (WUBRG + C).
+.color-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-1);
+}
+
+.color-chip {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	border: 1px solid var(--line-2);
+	border-radius: var(--radius-xs);
+	background: transparent;
+	color: var(--bone);
+	font-family: var(--body);
+	font-size: 11px;
+	letter-spacing: 0.04em;
+	cursor: pointer;
+	transition: border-color var(--t-fast), background var(--t-fast);
+
+	&:hover {
+		border-color: var(--bone-2);
+	}
+
+	&[aria-pressed="true"] {
+		border-color: var(--carmesi);
+		background: rgba(214, 40, 40, 0.1);
+	}
+
+	.mana {
+		flex: 0 0 auto;
+	}
+
+	&__label {
+		text-transform: uppercase;
+	}
+}
+
+// Checkbox lists (Set, Rareza).
+.filter-checkbox {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	padding: 5px 2px;
+	font-size: 12px;
+	color: var(--bone-2);
+	cursor: pointer;
+	border-radius: var(--radius-xs);
+	transition: background var(--t-fast);
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.02);
+	}
+
+	input[type="checkbox"] {
+		accent-color: var(--carmesi);
+		cursor: pointer;
+	}
+
+	.set-icon {
+		flex: 0 0 auto;
+	}
+
+	&__label {
+		flex: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__count {
+		color: var(--mid);
+		font-size: 10px;
+		flex: 0 0 auto;
+	}
+}
+
+// Set picker — buscador + lista scrollable.
+.filter-set-search {
+	margin-bottom: var(--space-2);
+	font-size: 12px;
+	height: 32px;
+	padding: 0 var(--space-2);
+}
+
+.filter-set-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	max-height: 200px;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: var(--line-2) transparent;
+
+	&::-webkit-scrollbar {
+		width: 4px;
+	}
+	&::-webkit-scrollbar-thumb {
+		background: var(--line-2);
+		border-radius: var(--radius-full);
+	}
+}
+
+.filter-empty {
+	font-size: 11px;
+	color: var(--mid);
+	margin: var(--space-2) 0 0;
+}
+
+// Condition grid (NM/LP/SP/MP/HP/DMG).
+.condition-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 4px;
+}
+
+.cond-chip {
+	padding: 6px 0;
+	font-family: var(--mono);
+	font-size: 11px;
+	font-weight: 600;
+	border: 1px solid var(--line-2);
+	background: transparent;
+	color: var(--mid-2);
+	border-radius: var(--radius-xs);
+	cursor: pointer;
+	transition: all var(--t-fast);
+
+	&:hover:not(.is-disabled) {
+		border-color: var(--bone-2);
+		color: var(--bone);
+	}
+
+	&[aria-pressed="true"] {
+		border-color: var(--carmesi);
+		background: rgba(214, 40, 40, 0.1);
+		color: var(--bone);
+	}
+
+	&.is-disabled {
+		opacity: 0.35;
+		cursor: not-allowed;
+	}
+}
+
+// Foil 3-state toggle.
+.foil-toggle {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 4px;
+
+	&__btn {
+		padding: 6px 0;
+		font-size: 11px;
+		border: 1px solid var(--line-2);
+		background: transparent;
+		color: var(--mid-2);
+		border-radius: var(--radius-xs);
+		cursor: pointer;
+		transition: all var(--t-fast);
+
+		&:hover {
+			border-color: var(--bone-2);
+			color: var(--bone);
+		}
+
+		&.is-active {
+			border-color: var(--carmesi);
+			background: rgba(214, 40, 40, 0.1);
+			color: var(--bone);
+		}
+	}
+}
+
+// Lang grid.
+.lang-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 4px;
+}
+
+.lang-chip {
+	padding: 6px 0;
+	font-family: var(--mono);
+	font-size: 11px;
+	border: 1px solid var(--line-2);
+	background: transparent;
+	color: var(--mid-2);
+	border-radius: var(--radius-xs);
+	cursor: pointer;
+	transition: all var(--t-fast);
+
+	&:hover {
+		border-color: var(--bone-2);
+		color: var(--bone);
+	}
+
+	&[aria-pressed="true"] {
+		border-color: var(--carmesi);
+		background: rgba(214, 40, 40, 0.1);
+		color: var(--bone);
+	}
+}
+
+// Price slider + inputs.
+.price-inputs {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+	margin-bottom: 10px;
+
+	&__sep {
+		color: var(--mid);
+	}
+}
+
+.price-input {
+	font-size: 12px;
+	height: 32px;
+	padding: 0 var(--space-2);
+	font-family: var(--mono);
+	width: 100%;
+	min-width: 0;
+}
+
+.price-slider {
+	width: 100%;
+	accent-color: var(--carmesi);
+	cursor: pointer;
+}
+
+.price-scale {
+	display: flex;
+	justify-content: space-between;
+	font-size: 10px;
+	color: var(--mid);
+	margin-top: 4px;
+}
+
+// "Solo en stock" toggle.
+.stock-toggle {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	cursor: pointer;
+	font-size: 12px;
+	color: var(--bone-2);
+
+	input[type="checkbox"] {
+		position: absolute;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	&__track {
+		position: relative;
+		width: 32px;
+		height: 18px;
+		background: var(--carbon-3);
+		border-radius: 10px;
+		transition: background var(--t-fast);
+		flex: 0 0 auto;
+	}
+
+	&__thumb {
+		position: absolute;
+		top: 2px;
+		left: 2px;
+		width: 14px;
+		height: 14px;
+		background: white;
+		border-radius: 50%;
+		transition: left var(--t-fast);
+	}
+
+	input:checked + &__track {
+		background: var(--carmesi);
+	}
+
+	input:checked + &__track .stock-toggle__thumb {
+		left: 16px;
+	}
+
+	&__label {
+		flex: 1;
+	}
+}

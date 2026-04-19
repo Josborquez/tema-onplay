@@ -1,16 +1,24 @@
-// Archive / shop listing
+// Archive / shop listing (Módulo 6).
 
 .shop-main {
 	padding: var(--space-10) 0 var(--space-16);
 }
 
 .shop-header {
-	margin-bottom: var(--space-8);
 	display: flex;
 	align-items: flex-end;
 	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: var(--space-4);
+	padding-bottom: var(--space-6);
+	border-bottom: 1px solid var(--line);
+	margin-bottom: var(--space-8);
+
+	&__lead {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+	}
 
 	&__kicker {
 		font-family: var(--mono);
@@ -18,7 +26,6 @@
 		letter-spacing: 0.16em;
 		color: var(--carmesi);
 		text-transform: uppercase;
-		margin-bottom: var(--space-1);
 	}
 
 	&__title {
@@ -27,23 +34,95 @@
 		line-height: 0.95;
 		text-transform: uppercase;
 		color: var(--bone);
+		margin: 0;
+	}
+
+	&__meta {
+		display: flex;
+		gap: var(--space-2);
+		align-items: center;
+		font-size: 13px;
+		color: var(--mid-2);
 	}
 
 	&__count {
-		font-family: var(--mono);
-		font-size: 12px;
-		color: var(--mid-2);
-		letter-spacing: 0.08em;
+		color: var(--bone);
 	}
+
+	&__tools {
+		display: flex;
+		gap: var(--space-3);
+		align-items: center;
+	}
+}
+
+.shop-sort .input {
+	height: 38px;
+	padding: 0 var(--space-3);
+	font-size: 13px;
+	min-width: 220px;
+}
+
+.shop-layout {
+	display: grid;
+	grid-template-columns: 280px 1fr;
+	gap: var(--space-8);
+
+	@media (max-width: 960px) {
+		grid-template-columns: 1fr;
+	}
+}
+
+.shop-results {
+	min-width: 0; // permite que el grid encoja sin desbordar.
+
+	&__chips {
+		min-height: 0;
+	}
+
+	&__pagination {
+		margin-top: var(--space-10);
+	}
+
+	&__loading {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: var(--space-2);
+		padding: var(--space-8) 0;
+		color: var(--mid-2);
+		font-size: 13px;
+	}
+}
+
+// Loading dim mientras se hace fetch (clase agregada por JS al .shop-results__grid).
+.shop-results__grid.is-loading {
+	opacity: 0.4;
+	pointer-events: none;
+	transition: opacity var(--t-fast);
+}
+
+.shop-spinner {
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	border: 2px solid var(--line-2);
+	border-top-color: var(--carmesi);
+	border-radius: 50%;
+	animation: onplay-spin 0.8s linear infinite;
+}
+
+@keyframes onplay-spin {
+	to { transform: rotate(360deg); }
 }
 
 .shop-grid {
 	display: grid;
-	grid-template-columns: repeat(6, 1fr);
+	grid-template-columns: repeat(4, 1fr);
 	gap: var(--space-4);
 
 	@media (max-width: 1200px) {
-		grid-template-columns: repeat(4, 1fr);
+		grid-template-columns: repeat(3, 1fr);
 	}
 
 	@media (max-width: 720px) {
@@ -57,17 +136,72 @@
 	text-align: center;
 	color: var(--mid-2);
 	font-size: 14px;
+	border: 1px dashed var(--line);
+	border-radius: var(--radius-md);
 }
 
+// Active filter chips (sobre el grid).
+.shop-active-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	margin-bottom: var(--space-5);
+	min-height: 0;
+
+	&:empty {
+		display: none;
+	}
+
+	&__clear {
+		background: transparent;
+		border: 0;
+		color: var(--carmesi);
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		cursor: pointer;
+		padding: 4px 8px;
+		font-family: var(--mono);
+
+		&:hover {
+			color: var(--carmesi-hover);
+		}
+	}
+}
+
+.chip-active {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	background: rgba(214, 40, 40, 0.12);
+	border: 1px solid rgba(214, 40, 40, 0.4);
+	border-radius: var(--radius-xs);
+	font-size: 11px;
+	color: var(--bone);
+	cursor: pointer;
+	font-family: var(--body);
+	transition: background var(--t-fast);
+
+	&:hover {
+		background: rgba(214, 40, 40, 0.2);
+	}
+
+	.chip__close {
+		color: var(--mid-2);
+		font-size: 14px;
+		line-height: 1;
+	}
+}
+
+// Pagination numerada (botones JS, no enlaces).
 .shop-pagination {
-	margin-top: var(--space-10);
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	gap: var(--space-2);
+	gap: var(--space-1);
 
-	a,
-	span {
+	&__btn {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -81,17 +215,23 @@
 		font-size: 13px;
 		text-decoration: none;
 		border-radius: var(--radius-xs);
+		cursor: pointer;
 		transition: all var(--t-fast);
 
 		&:hover {
 			border-color: var(--line-2);
 			color: var(--bone);
 		}
+
+		&.is-current {
+			background: var(--carmesi);
+			border-color: var(--carmesi);
+			color: #fff;
+		}
 	}
 
-	.current {
-		background: var(--carmesi);
-		border-color: var(--carmesi);
-		color: #fff;
+	&__gap {
+		padding: 0 var(--space-2);
+		color: var(--mid);
 	}
 }
