@@ -25,6 +25,15 @@ $price      = (float) $product->get_price();
 $title      = get_the_title( $product_id );
 $title_clean = trim( preg_replace( '/\s*\(Foil\)\s*/i', '', $title ) );
 
+// Si venimos del listado agrupado (Módulo 6), $GLOBALS['onplay_card_group']
+// trae min_price + variant_count del print_key. Lo usamos para mostrar
+// "desde $X.XXX" + badge "+N variantes" cuando aplica.
+$group         = isset( $GLOBALS['onplay_card_group'] ) ? $GLOBALS['onplay_card_group'] : null;
+$has_group     = is_array( $group ) && isset( $group['variant_count'] );
+$variant_count = $has_group ? (int) $group['variant_count'] : 1;
+$display_price = $has_group ? (float) $group['min_price'] : $price;
+$is_from_group = $has_group && $variant_count > 1;
+
 $rarity_class = 'badge-common';
 $rarity_label = 'C';
 switch ( $rarity ) {
@@ -126,7 +135,20 @@ if ( is_array( $category_terms ) && ! empty( $category_terms ) ) {
 			<?php endif; ?>
 		</div>
 		<div class="card-product__price-row">
-			<div class="card-product__price"><?php echo esc_html( onplay_format_clp( $price ) ); ?></div>
+			<?php if ( $is_from_group ) : ?>
+				<div class="card-product__price-wrap">
+					<span class="card-product__price-from"><?php esc_html_e( 'desde', 'onplay' ); ?></span>
+					<div class="card-product__price"><?php echo esc_html( onplay_format_clp( $display_price ) ); ?></div>
+				</div>
+				<span class="card-product__variant-badge mono">
+					<?php
+					/* translators: %d: number of additional variants */
+					echo esc_html( sprintf( _n( '+%d variante', '+%d variantes', $variant_count, 'onplay' ), $variant_count ) );
+					?>
+				</span>
+			<?php else : ?>
+				<div class="card-product__price"><?php echo esc_html( onplay_format_clp( $display_price ) ); ?></div>
+			<?php endif; ?>
 		</div>
 	</div>
 </a>
