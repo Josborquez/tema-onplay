@@ -291,6 +291,36 @@ function onplay_format_clp( $amount ) {
 }
 
 /**
+ * Redirigir `/product-category/<slug>/` → `/tienda/?set=<slug>`.
+ *
+ * El listado del tema lee filtros solo de `$_GET` (ver `onplay_filters_parse_request`).
+ * Sin este redirect, al entrar desde breadcrumbs o links externos al archive nativo
+ * de `product_cat`, el state queda vacío y se muestra el catálogo completo en vez
+ * de la categoría pedida. Unificar en `/tienda/?set=` mantiene una sola URL shareable
+ * y deja el chip del set coherente con la UI. 302 (no 301) para permitir cambiar
+ * de estrategia en M10 si revisamos canonical por SEO.
+ */
+add_action(
+	'template_redirect',
+	function () {
+		if ( ! is_product_category() ) {
+			return;
+		}
+		$term = get_queried_object();
+		if ( ! $term || empty( $term->slug ) ) {
+			return;
+		}
+		$shop_url = wc_get_page_permalink( 'shop' );
+		if ( ! $shop_url ) {
+			return;
+		}
+		$target = add_query_arg( 'set', rawurlencode( $term->slug ), $shop_url );
+		wp_safe_redirect( $target, 302 );
+		exit;
+	}
+);
+
+/**
  * Remove WC's default loop wrappers — we control markup fully.
  */
 remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10 );
