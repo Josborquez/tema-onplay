@@ -21,6 +21,7 @@
 
 @use "templates/shop";
 @use "templates/single-product";
+@use "templates/cart";
 
 // Transición de entrada (reutilizable)
 .screen-enter {

@@ -1,5 +1,4 @@
-// Cart drawer — versión mínima Módulo 4.
-// Operaciones avanzadas (sumar/restar/eliminar) se agregan en Módulo 7.
+// Cart drawer — Módulo 4 + stepper/remove/errores del Módulo 7.
 
 .cart-drawer {
 	position: fixed;
@@ -141,6 +140,13 @@
 		min-width: 0;
 	}
 
+	&__item-head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--space-2);
+	}
+
 	&__item-title {
 		font-weight: 500;
 		font-size: 14px;
@@ -149,6 +155,26 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__item-remove {
+		appearance: none;
+		background: transparent;
+		border: 0;
+		color: var(--mid);
+		font-size: 20px;
+		line-height: 1;
+		cursor: pointer;
+		padding: 2px 6px;
+		border-radius: var(--radius-xs);
+		transition: color var(--t-fast), background var(--t-fast);
+
+		&:hover {
+			color: var(--carmesi);
+			background: rgba(214, 40, 40, 0.08);
+		}
 	}
 
 	&__item-variant {
@@ -159,8 +185,9 @@
 
 	&__item-line {
 		display: flex;
-		align-items: baseline;
+		align-items: center;
 		justify-content: space-between;
+		gap: var(--space-2);
 		margin-top: var(--space-2);
 	}
 
@@ -174,6 +201,87 @@
 		font-weight: 600;
 		color: var(--bone);
 	}
+
+	&__stepper {
+		display: inline-flex;
+		align-items: stretch;
+		border: 1px solid var(--line);
+		border-radius: var(--radius-xs);
+		overflow: hidden;
+		background: var(--carbon-2);
+	}
+
+	&__stepper-btn {
+		appearance: none;
+		background: transparent;
+		border: 0;
+		width: 28px;
+		height: 28px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--bone);
+		font-size: 14px;
+		line-height: 1;
+		cursor: pointer;
+		transition: background var(--t-fast), color var(--t-fast);
+
+		&:hover:not(:disabled) {
+			background: var(--carbon);
+			color: var(--carmesi);
+		}
+
+		&:disabled {
+			color: var(--mid);
+			cursor: not-allowed;
+		}
+	}
+
+	&__stepper-input {
+		width: 36px;
+		height: 28px;
+		text-align: center;
+		background: var(--carbon);
+		border: 0;
+		border-left: 1px solid var(--line);
+		border-right: 1px solid var(--line);
+		color: var(--bone);
+		font-family: var(--mono);
+		font-size: 13px;
+
+		&::-webkit-inner-spin-button,
+		&::-webkit-outer-spin-button {
+			-webkit-appearance: none;
+			margin: 0;
+		}
+
+		&[type="number"] {
+			-moz-appearance: textfield;
+		}
+
+		&:focus {
+			outline: 2px solid var(--carmesi);
+			outline-offset: -2px;
+		}
+	}
+
+	&__item.is-updating,
+	.cart-row.is-updating {
+		opacity: 0.55;
+		pointer-events: none;
+	}
+}
+
+// Error local por fila (compartido drawer + /carrito/).
+.cart-row__error {
+	grid-column: 1 / -1;
+	margin-top: var(--space-2);
+	padding: 6px 10px;
+	background: rgba(214, 40, 40, 0.12);
+	border: 1px solid rgba(214, 40, 40, 0.4);
+	color: var(--bone);
+	font-size: 12px;
+	border-radius: var(--radius-xs);
 
 	&__footer {
 		flex-shrink: 0;
