@@ -26,9 +26,10 @@ wp-content/backups/
 .env.*
 !.env.example
 
-# Editores / SO
+# Editores / SO / Claude Code state
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 .DS_Store

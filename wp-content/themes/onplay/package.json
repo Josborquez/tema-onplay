@@ -1,0 +1,19 @@
+{
+  "name": "onplay-theme",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tema custom de WordPress para onplay.cl — tienda de singles de Magic",
+  "scripts": {
+    "build:css": "sass assets/src/scss/main.scss assets/dist/style.css --no-source-map --style=compressed --load-path=assets/src/scss",
+    "build:js": "node -e \"require('fs').copyFileSync('assets/src/js/main.js','assets/dist/main.js')\"",
+    "build": "npm run build:css && npm run build:js",
+    "watch:css": "sass assets/src/scss/main.scss assets/dist/style.css --watch --style=expanded --load-path=assets/src/scss",
+    "watch": "npm run watch:css"
+  },
+  "devDependencies": {
+    "sass": "^1.77.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

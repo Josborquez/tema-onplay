@@ -1,0 +1,70 @@
+// Onplay theme — entrypoint SCSS.
+// Orden importa: tokens → reset → base → utilidades → componentes.
+
+@use "tokens";
+@use "reset";
+@use "typography";
+@use "layout";
+@use "grain";
+
+@use "components/button";
+@use "components/input";
+@use "components/badge";
+@use "components/card-product";
+@use "components/header";
+@use "components/footer";
+
+// Transición de entrada (reutilizable)
+.screen-enter {
+	animation: onplay-screen-in 300ms ease;
+}
+
+@keyframes onplay-screen-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+// Home placeholder (Módulo 9 la implementa completa)
+.home-placeholder {
+	min-height: 60vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: var(--space-16) var(--space-6);
+
+	&__kicker {
+		font-family: var(--mono);
+		font-size: 11px;
+		letter-spacing: 0.24em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+		margin-bottom: var(--space-3);
+	}
+
+	&__title {
+		font-family: var(--display);
+		font-size: clamp(48px, 8vw, 96px);
+		line-height: 0.92;
+		text-transform: uppercase;
+		margin-bottom: var(--space-4);
+
+		.is-accent {
+			color: var(--carmesi);
+		}
+	}
+
+	&__desc {
+		color: var(--mid-2);
+		max-width: 520px;
+		margin: 0 auto;
+		font-size: 14px;
+		line-height: 1.6;
+	}
+}

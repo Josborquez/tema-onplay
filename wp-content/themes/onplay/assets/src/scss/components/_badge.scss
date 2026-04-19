@@ -1,0 +1,63 @@
+// Badges — rareza, stock, foil, próximamente
+
+.badge {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-1);
+	padding: 2px 6px;
+	font-size: 10px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	font-family: var(--body);
+	border-radius: var(--radius-xs);
+	border: 1px solid transparent;
+	line-height: 1.4;
+
+	&-foil {
+		background: linear-gradient(90deg, var(--gold-deep), var(--gold));
+		color: #1a1200;
+	}
+
+	&-mythic {
+		background: transparent;
+		border-color: var(--gold);
+		color: var(--gold);
+	}
+
+	&-rare {
+		background: transparent;
+		border-color: #b8b8b8;
+		color: #d0d0d0;
+	}
+
+	&-uncommon {
+		background: transparent;
+		border-color: #6b7f8e;
+		color: #9badb8;
+	}
+
+	&-common {
+		background: transparent;
+		border-color: var(--line-2);
+		color: var(--mid-2);
+	}
+
+	&-stock-low {
+		background: rgba(245, 158, 11, 0.15);
+		color: var(--amber);
+		border-color: rgba(245, 158, 11, 0.3);
+	}
+
+	&-stock-ok {
+		background: rgba(63, 185, 80, 0.12);
+		color: var(--green);
+		border-color: rgba(63, 185, 80, 0.25);
+	}
+
+	&-proximamente {
+		background: rgba(214, 40, 40, 0.12);
+		color: var(--carmesi);
+		border-color: rgba(214, 40, 40, 0.3);
+	}
+}

@@ -1,0 +1,35 @@
+// Inputs y tags
+
+.input {
+	background: var(--carbon);
+	border: 1px solid var(--line);
+	color: var(--bone);
+	padding: 10px 12px;
+	font-family: var(--body);
+	font-size: 13px;
+	border-radius: var(--radius-xs);
+	width: 100%;
+	outline: none;
+	transition: border-color var(--t-fast);
+
+	&:focus {
+		border-color: var(--carmesi);
+	}
+
+	&::placeholder {
+		color: var(--mid);
+	}
+}
+
+.tag {
+	display: inline-flex;
+	padding: 4px 8px;
+	background: var(--carbon-2);
+	border: 1px solid var(--line);
+	color: var(--bone-2);
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: 0.04em;
+	border-radius: var(--radius-xs);
+	text-transform: uppercase;
+}

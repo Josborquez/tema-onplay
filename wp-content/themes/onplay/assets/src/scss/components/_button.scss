@@ -1,0 +1,78 @@
+// Botones
+
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-2);
+	padding: 10px 16px;
+	border: 1px solid transparent;
+	background: transparent;
+	color: var(--bone);
+	font-family: var(--body);
+	font-weight: 500;
+	font-size: 13px;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	transition: all var(--t-fast);
+	cursor: pointer;
+	border-radius: var(--radius-xs);
+	text-decoration: none;
+
+	&-primary {
+		background: var(--carmesi);
+		color: #fff;
+
+		&:hover {
+			background: var(--carmesi-hover);
+			transform: translateY(-1px);
+		}
+
+		&:active {
+			transform: translateY(0);
+		}
+	}
+
+	&-secondary {
+		background: transparent;
+		border-color: var(--line-2);
+		color: var(--bone);
+
+		&:hover {
+			border-color: var(--bone);
+			background: rgba(255, 255, 255, 0.03);
+		}
+	}
+
+	&-ghost {
+		padding: 8px 10px;
+		color: var(--mid-2);
+
+		&:hover {
+			color: var(--bone);
+		}
+	}
+
+	&-sm {
+		padding: 6px 10px;
+		font-size: 11px;
+	}
+
+	&-lg {
+		padding: 14px 22px;
+		font-size: 14px;
+	}
+}
+
+@keyframes onplay-pulse {
+	0% {
+		box-shadow: 0 0 0 0 rgba(214, 40, 40, 0.4);
+	}
+	100% {
+		box-shadow: 0 0 0 12px rgba(214, 40, 40, 0);
+	}
+}
+
+.added-pulse {
+	animation: onplay-pulse 600ms ease-out;
+}

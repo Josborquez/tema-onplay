@@ -1,0 +1,77 @@
+// Tokens de diseño de onplay.cl
+// Fuente: design file de Claude Design `qsNZptfkkYAPh-YFwd9hQA`
+// NO editar valores aquí sin coordinar con el design file.
+
+:root {
+	// Acento carmesí
+	--carmesi: #D62828;
+	--carmesi-hover: #E84040;
+	--carmesi-deep: #A51D1D;
+
+	// Superficies oscuras
+	--black: #0A0A0A;
+	--carbon: #141414;
+	--carbon-2: #1A1A1A;
+	--carbon-3: #222222;
+	--carbon-4: #2B2B2B;
+
+	// Bordes y separadores
+	--line: #2B2B2B;
+	--line-2: #383838;
+
+	// Neutros mid
+	--mid: #6B6B6B;
+	--mid-2: #8A8A8A;
+
+	// Texto claro
+	--bone: #F5F5F5;
+	--bone-2: #E5E5E5;
+
+	// Acentos secundarios
+	--gold: #E8B04B;
+	--gold-deep: #B8862B;
+	--green: #3FB950;
+	--amber: #F59E0B;
+
+	// Tipografía
+	--display: "Bebas Neue", "Oswald", "Arial Narrow", sans-serif;
+	--body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+	--mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
+
+	// Radios (sistema casi cuadrado)
+	--radius-xs: 2px;
+	--radius-sm: 3px;
+	--radius-md: 4px;
+	--radius-lg: 8px;
+	--radius-full: 999px;
+
+	// Espaciado (base 4px)
+	--space-1: 4px;
+	--space-2: 8px;
+	--space-3: 12px;
+	--space-4: 16px;
+	--space-5: 20px;
+	--space-6: 24px;
+	--space-8: 32px;
+	--space-10: 40px;
+	--space-12: 48px;
+	--space-14: 56px;
+	--space-16: 64px;
+	--space-20: 80px;
+
+	// Z-index scale
+	--z-grain: 9999;
+	--z-header: 100;
+	--z-drawer: 200;
+	--z-modal: 500;
+	--z-tweaks: 1000;
+
+	// Layout
+	--container-max: 1440px;
+	--container-pad: 32px;
+
+	// Transiciones
+	--t-fast: 120ms ease;
+	--t-base: 160ms ease;
+	--t-slow: 280ms ease;
+}

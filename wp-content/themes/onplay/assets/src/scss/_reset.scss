@@ -1,0 +1,66 @@
+// Reset mínimo moderno
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background: var(--black);
+	color: var(--bone);
+	font-family: var(--body);
+	font-size: 14px;
+	line-height: 1.5;
+	min-height: 100vh;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+button {
+	font-family: inherit;
+	cursor: pointer;
+	background: none;
+	border: none;
+	padding: 0;
+	color: inherit;
+}
+
+img,
+svg,
+video,
+canvas {
+	display: block;
+	max-width: 100%;
+}
+
+input,
+select,
+textarea {
+	font-family: inherit;
+	font-size: inherit;
+}
+
+ul,
+ol {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+// WP admin bar ajuste
+body.admin-bar {
+	min-height: calc(100vh - 32px);
+}
