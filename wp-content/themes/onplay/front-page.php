@@ -1,25 +1,29 @@
 <?php
 /**
- * Front page — placeholder. La home real se implementa en el Módulo 9.
+ * Front page — Home del tema (Módulo 9).
+ *
+ * Orden vertical: Hero → Trust band → Sets recientes → Recién ingresadas.
+ * Cada sección vive en `template-parts/home/*.php` para que mañana se puedan
+ * convertir en bloques Gutenberg sin mover lógica de render.
  *
  * @package Onplay
  */
 
+defined( 'ABSPATH' ) || exit;
+
 get_header();
 ?>
 
-<main id="primary" class="site-main">
-	<section class="home-placeholder container screen-enter">
-		<div>
-			<div class="home-placeholder__kicker"><?php esc_html_e( 'Módulo 1 · Fundación', 'onplay' ); ?></div>
-			<h1 class="home-placeholder__title">
-				Home <span class="is-accent">coming soon</span>
-			</h1>
-			<p class="home-placeholder__desc">
-				<?php esc_html_e( 'La fundación del tema está lista. La home definitiva (hero híbrido, recién ingresados, sets, trust band) se implementa en el Módulo 9.', 'onplay' ); ?>
-			</p>
-		</div>
-	</section>
+<main id="primary" class="site-main home-main screen-enter">
+
+	<?php get_template_part( 'template-parts/home/hero' ); ?>
+
+	<?php get_template_part( 'template-parts/home/trust-band' ); ?>
+
+	<?php get_template_part( 'template-parts/home/featured-sets' ); ?>
+
+	<?php get_template_part( 'template-parts/home/recent-cards' ); ?>
+
 </main>
 
 <?php
