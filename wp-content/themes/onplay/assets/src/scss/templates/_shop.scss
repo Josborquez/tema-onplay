@@ -92,6 +92,10 @@
 		padding: var(--space-8) 0;
 		color: var(--mid-2);
 		font-size: 13px;
+
+		&[hidden] {
+			display: none;
+		}
 	}
 }
 

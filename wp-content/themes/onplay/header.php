@@ -46,11 +46,18 @@
 				</div>
 			</a>
 
+			<?php
+			$onplay_shop_url  = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
+			$onplay_search_q  = '';
+			if ( isset( $_GET['q'] ) ) {
+				$onplay_search_q = sanitize_text_field( wp_unslash( $_GET['q'] ) );
+			}
+			?>
 			<form
 				role="search"
 				method="get"
 				class="site-header__search"
-				action="<?php echo esc_url( home_url( '/' ) ); ?>"
+				action="<?php echo esc_url( $onplay_shop_url ); ?>"
 				data-onplay-search
 			>
 				<svg class="site-header__search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -61,10 +68,10 @@
 				<input
 					id="onplay-search"
 					type="search"
-					name="s"
+					name="q"
 					class="input"
 					placeholder="<?php esc_attr_e( 'Buscar cartas, sets, ediciones…  (ej: Lightning Bolt, MH3)', 'onplay' ); ?>"
-					value="<?php echo esc_attr( get_search_query() ); ?>"
+					value="<?php echo esc_attr( $onplay_search_q ); ?>"
 					autocomplete="off"
 					role="combobox"
 					aria-expanded="false"

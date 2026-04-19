@@ -302,13 +302,13 @@
 				if (!Search.form.contains(e.target)) Search.hide();
 			});
 
-			// Submit nativo: si hay un item activo, ir a su permalink.
+			// Submit: si hay un item activo del dropdown, ir a su permalink.
+			// Si no, dejamos que el submit nativo llegue a /tienda/?q=... (action del form).
 			Search.form.addEventListener("submit", function (e) {
 				if (Search.activeIndex >= 0 && Search.items[Search.activeIndex]) {
 					e.preventDefault();
 					window.location.href = Search.items[Search.activeIndex].permalink;
 				}
-				// si no, deja submit nativo a /?s=...
 			});
 		},
 
