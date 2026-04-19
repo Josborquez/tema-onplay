@@ -270,18 +270,6 @@
 		opacity: 0.55;
 		pointer-events: none;
 	}
-}
-
-// Error local por fila (compartido drawer + /carrito/).
-.cart-row__error {
-	grid-column: 1 / -1;
-	margin-top: var(--space-2);
-	padding: 6px 10px;
-	background: rgba(214, 40, 40, 0.12);
-	border: 1px solid rgba(214, 40, 40, 0.4);
-	color: var(--bone);
-	font-size: 12px;
-	border-radius: var(--radius-xs);
 
 	&__footer {
 		flex-shrink: 0;
@@ -333,6 +321,18 @@
 			justify-content: center;
 		}
 	}
+}
+
+// Error local por fila (compartido drawer + /carrito/).
+.cart-row__error {
+	grid-column: 1 / -1;
+	margin-top: var(--space-2);
+	padding: 6px 10px;
+	background: rgba(214, 40, 40, 0.12);
+	border: 1px solid rgba(214, 40, 40, 0.4);
+	color: var(--bone);
+	font-size: 12px;
+	border-radius: var(--radius-xs);
 }
 
 // Lock body scroll cuando el drawer está abierto.
