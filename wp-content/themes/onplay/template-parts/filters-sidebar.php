@@ -84,7 +84,7 @@ foreach ( $cond_terms as $t ) {
 							data-filter="set"
 							value="<?php echo esc_attr( $slug ); ?>"
 						/>
-						<?php echo onplay_render_set_icon( substr( $facet['name'], 0, 3 ), 12 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo onplay_render_set_badge( substr( $facet['name'], 0, 3 ), 12 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<span class="filter-checkbox__label"><?php echo esc_html( $facet['name'] ); ?></span>
 						<span class="filter-checkbox__count mono"><?php echo esc_html( (string) $facet['count'] ); ?></span>
 					</label>

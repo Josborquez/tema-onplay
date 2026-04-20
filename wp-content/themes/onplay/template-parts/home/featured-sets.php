@@ -4,7 +4,9 @@
  *
  * Top 6 sets cuyas cartas se publicaron más recientemente. Cada card linkea a
  * `/tienda/?set=<slug>` (el listado con filtro activo). El ícono del set usa
- * el helper `onplay_render_set_icon()` con las 3 primeras letras del nombre.
+ * el helper `onplay_render_set_badge()` (diamante monograma, 3 primeras letras del slug).
+ * No usamos Keyrune aquí porque las categorías no guardan el código del set (sólo vive
+ * en el SKU del producto). Ver docblock de `onplay_render_set_icon()`.
  *
  * @package Onplay
  */
@@ -38,7 +40,7 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 				?>
 				<a class="home-sets__card" href="<?php echo esc_url( $set_url ); ?>">
 					<div class="home-sets__icon" aria-hidden="true">
-						<?php echo onplay_render_set_icon( $set_code, 48 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php echo onplay_render_set_badge( $set_code, 48 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</div>
 					<div class="home-sets__info">
 						<div class="home-sets__name"><?php echo esc_html( $set['name'] ); ?></div>

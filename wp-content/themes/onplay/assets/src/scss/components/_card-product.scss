@@ -164,6 +164,18 @@
 	font-family: var(--mono);
 }
 
+// Keyrune (.ss.ss-*) y fallback diamante (.set-badge) — ver onplay_render_set_icon/badge
+.set-icon {
+	color: var(--bone);
+	line-height: 1;
+	display: inline-block;
+	flex-shrink: 0;
+}
+
+.set-badge {
+	flex-shrink: 0;
+}
+
 // Fallback when image fails
 .card-img-fallback {
 	position: absolute;

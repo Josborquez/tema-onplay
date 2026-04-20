@@ -213,18 +213,46 @@ function onplay_render_oracle_text( $text ) {
 }
 
 /**
- * Render a simple diamond set icon SVG.
+ * Render Keyrune set icon (webfont oficial MTG).
  *
- * @param string $set_code
+ * Recibe un código de set (ej. "MH2", "BLB") y lo renderiza como `<i class="ss ss-mh2">`.
+ * Keyrune cubre ~500 sets históricos + recientes con un único font load (ver inc/enqueue.php).
+ * Para casos donde NO se tiene el código del set (sólo nombre o slug de categoría), usar
+ * `onplay_render_set_badge()` — diamante monograma.
+ *
+ * @param string $set_code Código de set (case-insensitive). Ej. "MH2".
+ * @param int    $size Tamaño en px.
+ * @return string HTML del `<i>` de Keyrune.
+ */
+function onplay_render_set_icon( $set_code, $size = 14 ) {
+	$set_code_lower = strtolower( (string) $set_code );
+	$set_code_upper = strtoupper( (string) $set_code );
+	$size           = (int) $size;
+	return sprintf(
+		'<i class="ss ss-%1$s ss-fw set-icon" style="font-size:%2$dpx" aria-label="%3$s" title="%3$s"></i>',
+		esc_attr( $set_code_lower ),
+		$size,
+		esc_attr( $set_code_upper )
+	);
+}
+
+/**
+ * Render diamante monograma (fallback cuando no hay código de set).
+ *
+ * Usado en sidebar de filtros y home/featured-sets, donde sólo tenemos nombre/slug
+ * de categoría — no el código del set de la DB del manager (el código vive en el SKU).
+ * Migración futura: guardar `_onplay_set_code` como term_meta al sincronizar y pasar a
+ * `onplay_render_set_icon()` (Keyrune).
+ *
+ * @param string $label Texto corto (2-3 caracteres).
  * @param int    $size
  * @return string
  */
-function onplay_render_set_icon( $set_code, $size = 14 ) {
-	$set_code = strtoupper( (string) $set_code );
-	$label    = substr( $set_code, 0, 3 );
-	$size     = (int) $size;
+function onplay_render_set_badge( $label, $size = 14 ) {
+	$label = strtoupper( substr( (string) $label, 0, 3 ) );
+	$size  = (int) $size;
 	return sprintf(
-		'<svg class="set-icon" width="%1$d" height="%1$d" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 8 L8 15 L1 8 Z" fill="#6B6B6B" stroke="rgba(0,0,0,0.5)" stroke-width="0.5"/><text x="8" y="10.5" text-anchor="middle" font-size="6" font-family="var(--body)" font-weight="700" fill="white">%2$s</text></svg>',
+		'<svg class="set-badge" width="%1$d" height="%1$d" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 8 L8 15 L1 8 Z" fill="#6B6B6B" stroke="rgba(0,0,0,0.5)" stroke-width="0.5"/><text x="8" y="10.5" text-anchor="middle" font-size="6" font-family="var(--body)" font-weight="700" fill="white">%2$s</text></svg>',
 		$size,
 		esc_html( $label )
 	);

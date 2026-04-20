@@ -99,7 +99,9 @@ add_action(
 	function () {
 		echo "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n";
 		echo "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n";
-		echo "<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap\">\n";
+		echo "<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@1,700&display=swap\">\n";
+		// Keyrune — webfont oficial de símbolos de set MTG (MIT). Ver decision log §11.
+		echo "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.min.css\">\n";
 	},
 	1
 );
