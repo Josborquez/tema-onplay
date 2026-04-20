@@ -102,6 +102,8 @@ add_action(
 		echo "<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@1,700&display=swap\">\n";
 		// Keyrune — webfont oficial de símbolos de set MTG (MIT). Ver decision log §11.
 		echo "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.min.css\">\n";
+		// Mana-font — webfont compañero de Keyrune para símbolos de mana (MIT).
+		echo "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/mana-font@latest/css/mana.min.css\">\n";
 	},
 	1
 );

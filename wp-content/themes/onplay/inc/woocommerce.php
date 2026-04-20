@@ -86,60 +86,41 @@ function onplay_normalize_card_name( $title ) {
 }
 
 /**
- * Render a single mana symbol as an inline SVG span.
+ * Render a single mana symbol usando mana-font (Andrew Gioia, MIT).
  *
- * @param string $symbol e.g. "W", "U", "B", "R", "G", "C", "2", "X".
+ * Mana-font convierte `<i class="ms ms-X ms-cost ms-shadow">` en un círculo tipado
+ * con el glifo + fondo oficial de la comunidad MTG. Clases para:
+ *  - básicos: ms-w, ms-u, ms-b, ms-r, ms-g, ms-c (colorless)
+ *  - genéricos: ms-0..ms-20, ms-x, ms-y, ms-z
+ *  - snow: ms-s
+ *  - híbridos: ms-wu, ms-wb, ms-ub, ms-ur, ms-br, ms-bg, ms-rg, ms-rw, ms-gw, ms-gu
+ *  - phyrexian: ms-wp, ms-up, ms-bp, ms-rp, ms-gp
+ *
+ * @param string $symbol e.g. "W", "U", "2", "X", "W/U".
  * @param string $size   "sm" | "md" | "lg".
  * @return string HTML.
  */
 function onplay_render_mana_symbol( $symbol, $size = 'md' ) {
 	$symbol = strtoupper( trim( (string) $symbol ) );
-	$class  = 'mana';
+	if ( '' === $symbol ) {
+		return '';
+	}
+
+	// Mana-font usa minúsculas y sin `/` en los híbridos ("W/U" → "wu").
+	$slug = strtolower( str_replace( '/', '', $symbol ) );
+
+	$class = 'ms ms-' . $slug . ' ms-cost ms-shadow';
 	if ( 'sm' === $size ) {
 		$class .= ' mana-sm';
 	} elseif ( 'lg' === $size ) {
 		$class .= ' mana-lg';
 	}
 
-	$colors = array(
-		'W' => array( 'bg' => '#FFFBD5' ),
-		'U' => array( 'bg' => '#AAE0FA' ),
-		'B' => array( 'bg' => '#CBC2BF' ),
-		'R' => array( 'bg' => '#F9AA8F' ),
-		'G' => array( 'bg' => '#9BD3AE' ),
-		'C' => array( 'bg' => '#CCC2C0' ),
-	);
-
-	$glyphs = array(
-		'W' => '<svg viewBox="0 0 24 24" width="60%" height="60%" aria-hidden="true"><path fill="currentColor" d="M12 2 L14 9 L21 9 L15.5 13 L17.5 20 L12 15.5 L6.5 20 L8.5 13 L3 9 L10 9 Z"/></svg>',
-		'U' => '<svg viewBox="0 0 24 24" width="60%" height="60%" aria-hidden="true"><path fill="currentColor" d="M12 2 C12 2 4 10 4 15 C4 19.5 7.5 22 12 22 C16.5 22 20 19.5 20 15 C20 10 12 2 12 2 Z"/></svg>',
-		'B' => '<svg viewBox="0 0 24 24" width="60%" height="60%" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="currentColor"/></svg>',
-		'R' => '<svg viewBox="0 0 24 24" width="65%" height="65%" aria-hidden="true"><path fill="currentColor" d="M12 2 C9 8 5 9 5 14 C5 18.5 8.3 22 12 22 C15.7 22 19 18.5 19 14 C19 11 16 10 14 12 C14 9 13 5 12 2 Z"/></svg>',
-		'G' => '<svg viewBox="0 0 24 24" width="65%" height="65%" aria-hidden="true"><path fill="currentColor" d="M12 2 C7 5 5 10 6 14 C4 15 3 17 4 19 C6 21 9 20 10 18 C11 20 13 22 16 21 C19 20 21 16 20 12 C19 8 16 4 12 2 Z"/></svg>',
-		'C' => '<svg viewBox="0 0 24 24" width="55%" height="55%" aria-hidden="true"><path fill="currentColor" d="M12 3 L21 12 L12 21 L3 12 Z"/></svg>',
-	);
-
-	// Numeric or X → text inside generic pip.
-	if ( isset( $glyphs[ $symbol ] ) ) {
-		$bg = $colors[ $symbol ]['bg'];
-		return sprintf(
-			'<span class="%s" style="background:%s;color:#000" title="%s" aria-label="%s">%s</span>',
-			esc_attr( $class ),
-			esc_attr( $bg ),
-			esc_attr( $symbol ),
-			esc_attr( $symbol ),
-			$glyphs[ $symbol ]
-		);
-	}
-
-	// Numeric or special: show text in grey pip.
-	$label = $symbol;
 	return sprintf(
-		'<span class="%s" style="background:#CCC2C0;color:#000;font-weight:700" title="%s" aria-label="%s">%s</span>',
+		'<i class="%s" title="%s" aria-label="%s"></i>',
 		esc_attr( $class ),
-		esc_attr( $label ),
-		esc_attr( $label ),
-		esc_html( $label )
+		esc_attr( $symbol ),
+		esc_attr( $symbol )
 	);
 }
 
@@ -163,14 +144,8 @@ function onplay_render_mana_cost( $cost, $size = 'md' ) {
 		}
 		if ( preg_match_all( '/\{([^\}]+)\}/', $part, $m ) ) {
 			foreach ( $m[1] as $sym ) {
-				// Fuse mana like "W/U" → just show both separated; simple fallback.
-				if ( false !== strpos( $sym, '/' ) ) {
-					$sub = explode( '/', $sym );
-					foreach ( $sub as $s ) {
-						$html .= onplay_render_mana_symbol( $s, $size );
-					}
-					continue;
-				}
+				// Híbridos (W/U) y phyrexianos (W/P) se pasan combinados —
+				// mana-font los renderiza como un único símbolo (ms-wu, ms-wp).
 				$html .= onplay_render_mana_symbol( $sym, $size );
 			}
 		}
