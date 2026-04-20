@@ -83,13 +83,13 @@ if ( is_array( $category_terms ) && ! empty( $category_terms ) ) {
 		<?php
 		if ( has_post_thumbnail( $product_id ) ) {
 			// Imagen full + sizes attribute para que WP genere srcset responsivo.
-			// TCGPlayer usa slide de ~493px; definimos 500px desktop, 100vw mobile.
+			// En desktop la columna ocupa ~46% del contenido (grid 1fr/1.15fr).
 			echo get_the_post_thumbnail(
 				$product_id,
 				'full',
 				array(
 					'alt'   => esc_attr( $title_clean ),
-					'sizes' => '(max-width: 640px) 100vw, (max-width: 960px) 60vw, 500px',
+					'sizes' => '(max-width: 640px) 100vw, (max-width: 960px) 92vw, 46vw',
 				)
 			);
 		} else {
