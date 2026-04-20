@@ -650,9 +650,49 @@ Front-page con hero de búsqueda, recién ingresados, por set, confianza, footer
 - `2026-04-19` **Módulo 9 — "Recién ingresadas" ordenado por mayor valor (price-desc) dentro del pool de recientes.** `onplay_home_get_recent_cards()` toma los 150 SKUs más recientes en stock, colapsa por print_key y ordena con `onplay_sort_groups($g, 'price-desc')`. Razón: criterio del dueño — "las cartas van cambiando las que se ingresan pone la de mayor valor". El pool sigue siendo "recientes" así que las selecciones rotan al ingresar singles nuevos; dentro de ese pool destaca las de mayor valor comercial. **Rollback:** cambiar `'price-desc'` por `'new'` (orden original). El hero también consume este pool vía `onplay_home_get_hero_cards()`, así que el cambio beneficia ambos sitios.
 - `2026-04-19` **Módulo 9 — "Recién ingresadas" es carrusel horizontal con scroll-snap, NO grid.** `template-parts/home/recent-cards.php` usa `grid-auto-flow: column`, `grid-auto-columns: minmax(220px, 1fr)`, `overflow-x: auto`, `scroll-snap-type: x mandatory`. Header tiene botones `←/→` + "Ver todos →" (este último se oculta en <640px). Módulo JS `RecentCarousel` wirea las flechas a `scrollBy` con step dinámico (~60% del viewport). Razón: paridad con diseño `home.jsx` (JustArrived) y mejor densidad visual que un grid 4-col. **Rollback:** volver al grid con clase `.shop-grid` y remover el módulo JS.
 - `2026-04-19` **Módulo 9 — Símbolos de mana: mana-font oficial (no SVG inline).** `onplay_render_mana_symbol()` emite `<i class="ms ms-{slug} ms-cost ms-shadow">` donde `slug` = lowercase sin `/` (`W/U` → `wu`, `W/P` → `wp`). Mana-font (Andrew Gioia, MIT, compañera de Keyrune) se carga vía CDN en `inc/enqueue.php`. Ventajas sobre el stack anterior de SVG inline + `background-color`: (a) glifos pixel-perfect con el look oficial de la comunidad MTG (idéntico a Scryfall/MTGO), (b) híbridos y phyrexianos se renderizan como un único símbolo combinado en vez de dos pips separados, (c) tamaño controlado por `font-size` (18px md, 13px sm, 24px lg), (d) `ms-shadow` da el inset shadow profesional. `_mana-symbols.scss` simplificado: ya no define círculos ni glifos, solo tamaños y layout del wrapper `.mana-cost`. **Rollback:** restaurar la versión anterior de `onplay_render_mana_symbol()` (SVG inline con `$glyphs` array + `$colors` array) y el SCSS con `.mana { width: 22px; ... }` desde el commit previo. Mantener Keyrune (no afecta).
-- `2026-04-19` **Módulo 9 — Imagen PDP con srcset responsivo (fiel al diseño).** `woocommerce/content-single-product.php` usa `get_the_post_thumbnail($pid, 'full', ['sizes' => '(max-width: 640px) 100vw, (max-width: 960px) 92vw, 46vw'])`. WP auto-genera `srcset` a partir de las registered sizes del attachment; el browser elige la mejor resolución según viewport + DPR. Grid PDP conserva el `1fr/1.15fr` de `Onplay.cl/pdp.jsx` (detalles ligeramente más anchos que imagen) y `object-fit: cover` — la carta ocupa todo el frame sin padding interno. **Iteración previa descartada (commit `ffcfd8d`):** probé `minmax(0, 500px)` + `object-fit: contain`, pero rompía la proporción del diseño (imagen quedaba muy angosta en desktop >1200px) y `contain` generaba bandas negras en cartas con aspect ≠ 5/7 exacto. **Rollback:** volver a `'large'` + grid `1fr 1.15fr` (donde ya está ahora). Nota: si el manager guarda Scryfall en `normal` (488×680), el srcset es limitado — para srcset más rico habría que re-sync desde `large` 672×936 o `png` 745×1040.
+- `2026-04-19` **Módulo 9 — Imagen PDP capada a 460px (evita upscale desde Scryfall normal 488px).** Estado final tras 3 iteraciones en la misma sesión (commits `ffcfd8d` → `366c5d3` → `7e5ed4b`). Grid PDP: `minmax(0, 460px) minmax(0, 1fr)`, `.pdp__image { max-width: 460px; aspect-ratio: 5/7; object-fit: cover }`, `sizes="(max-width:640px) 100vw, (max-width:960px) 380px, 460px"` sobre `'full'`. Tamaño final en desktop: 460×644px. **Razón del cap:** el manager descarga Scryfall `normal` (488×680), así que cualquier display >488px obliga al browser a upscalear — se veía grande y borrosa. Con 460px hay ~6% de holgura para DPR y la carta no domina el viewport. **Iteraciones descartadas:** (a) `minmax(0, 500px)` + `object-fit: contain` generaba bandas negras en cartas con aspect ≠ 5/7 exacto, (b) `1fr/1.15fr` sin cap + `46vw` escalaba la imagen a ~660px en monitores grandes. **Rollback:** aumentar el cap si más adelante el dueño re-sincroniza imágenes desde Scryfall `large` (672×936) o `png` (745×1040) vía un comando del manager — el cap es el único valor a cambiar (SCSS `max-width` + PHP `sizes`).
 
 - `2026-04-19` **Módulo 9 — Hero reconstruido fiel a `Onplay.cl/home.jsx` (variante "hybrid"):** layout 2-col 1.15fr/1fr con glow radial rojo+dorado; izq: kicker con línea horizontal, título multi-línea con "exacta" en carmesi y "sin rodeos." en Playfair Display italic (agregada al Google Fonts stylesheet), sub, buscador prominente con icon absolute + button red, preview "Populares ahora" (4 filas server-side del pool de mayor valor — sin JS dinámico, evita duplicar el listener de `Search.init()` del header), stats row con counts reales de DB; der: stack flotante de 5 cartas absolute con rotaciones + animación `onplay-hero-float` 6s escalonada. `onplay_home_get_hero_cards()` reusa `onplay_home_get_recent_cards()` (stack=[0..5], preview=[5..9]) y `onplay_home_get_stats()` cachea 2 COUNTs con transient 1h. Responsive: <1024px apila en 1-col con stack encima; <640px oculta el stack completo. **Rollback:** el template minimalista anterior (kicker + título + sub + search centrado) vive en git history (commit 1036270) — revertirlo implica quitar también Playfair Display del enqueue y los helpers de stats/hero_cards en `inc/home.php`.
+
+---
+
+## 11.b. Cierre de sesión 2026-04-19 — Estado y pendientes
+
+### Hecho hoy (sesión completa)
+- **M9 core del home** (commits `9998259` → `4669b13` → `1036270` → `75e3ae9` → `735655d`): front-page + template-parts (`hero.php`, `trust-band.php`, `featured-sets.php`, `recent-cards.php`), helpers `onplay_home_get_*`, enqueue de Bebas+IBM Plex+Playfair+Keyrune+mana-font.
+- **M9 iconografía oficial**: Keyrune para símbolos de set (`<i class="ss ss-...">`), mana-font para símbolos de mana (`<i class="ss ms-... ms-cost ms-shadow">`) — reemplazó el stack de SVGs inline + fondos de color. Híbridos y phyrexianos ahora se renderizan como símbolo combinado.
+- **M9 recientes**: orden `price-desc` dentro del pool de 150 más nuevos en stock + carrusel horizontal con scroll-snap + flechas `←/→` wireadas por módulo JS `RecentCarousel`.
+- **M9 hero reconstruido** fiel al diseño `Onplay.cl/home.jsx` variante "hybrid": 2-col con stack flotante de 5 cartas animado, preview "Populares ahora" server-side, stats reales de DB cacheados 1h.
+- **M9 PDP — imagen capada a 460px** tras 3 iteraciones (commits `ffcfd8d` → `366c5d3` → `7e5ed4b`). Evita upscale desde la fuente Scryfall `normal` (488px).
+
+### Criterios de aceptación M9 cumplidos
+- Home carga con datos reales (hero · trust · featured sets · recent). ✓
+- Secciones pobladas desde el catálogo (410 productos). ✓
+- Fidelidad al diseño: hero hybrid, glow, Playfair italic, stack flotante con animación. ✓
+- Iconografía correcta (Keyrune + mana-font). ✓
+- Imagen PDP sin upscale ni bandas. ✓
+
+### Pendiente para mañana
+1. **Validar Lighthouse mobile del home** en local (target M10: ≥85). El hero carga 5 imágenes Scryfall + stack animado + 4 filas preview + Playfair externa — puede pegarle a LCP/CLS.
+2. **Decidir re-sync de imágenes Scryfall**: el cap PDP de 460px existe sólo porque el manager guarda `normal` (488px). Si el dueño re-sincroniza con `large` (672px) o `png` (745px), se puede subir el cap a 560–620px. Coordinar con Jose Manuel (ver §3.4, depende de que toque el manager).
+3. **M10 — arranque**: instalar Rank Math, Wordfence, UpdraftPlus, LiteSpeed Cache (o WP Super Cache). Configurar schemas `Product` + `Organization` + `BreadcrumbList` desde el tema (o delegar a Rank Math).
+4. **M8 — cierre formal pendiente desde antes**: depende de que el dueño configure shipping zones + Webpay sandbox + Mercado Pago sandbox en WC admin. Sin esto el criterio "pedido test end-to-end" no se puede validar. Ver entrada `2026-04-19 Módulo 8 — shipping zones + payment gateways + sandbox keys DIFERIDOS`.
+5. **Revisar bug Lamentation (ID 10407)** pendiente del M0: producto con `pa_estado`/`pa_idioma` vacíos por race condition del manager. Auditar cuántos productos están afectados (query documentada en §3.2).
+6. **M9 polish opcional** (low priority): (a) autocomplete en el hero search (hoy submite `?q=` al listado), (b) fallback "Buscar en Scryfall" en el autocomplete del header cuando `noResults`, (c) backfill `_onplay_set_code` como term_meta para usar Keyrune en `filters-sidebar` y `featured-sets` (hoy usan el diamante monograma fallback).
+
+### Commits del día (del más reciente al más antiguo)
+```
+7e5ed4b fix(M9-pdp-image): cap imagen PDP a 460px (evita upscale desde Scryfall normal 488px)
+366c5d3 fix(M9-pdp-image): revert columna PDP a 1fr/1.15fr con object-fit cover
+ffcfd8d feat(M9-mana-pdp): mana-font oficial + imagen PDP con srcset responsivo
+6dd5b7f docs(claude): registrar decisiones M9 hero/recent + Keyrune
+c2d55d4 feat(M9-hero): rebuild del hero fiel a Onplay.cl/home.jsx (hybrid)
+f34ab22 feat(M9-recent): carrusel horizontal + orden por mayor valor
+239055b feat(M9-keyrune): íconos oficiales MTG vía webfont + fallback diamante
+2cccb7f feat(M9-wiring): dist rebuild + docs CLAUDE.md §11
+0914f6e feat(M9-templates): front-page.php + 4 template-parts de home + SCSS
+675fd67 feat(M9-core): helpers de home (featured sets + recent cards)
+```
 
 ---
 
