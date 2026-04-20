@@ -28,7 +28,7 @@
 .pdp {
 	padding-top: var(--space-10);
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+	grid-template-columns: minmax(0, 460px) minmax(0, 1fr);
 	gap: var(--space-12);
 
 	@media (max-width: 960px) {
@@ -48,11 +48,12 @@
 		overflow: hidden;
 		cursor: zoom-in;
 		width: 100%;
+		max-width: 460px;
 
 		@media (max-width: 960px) {
 			position: static;
 			max-height: none;
-			max-width: 420px;
+			max-width: 380px;
 			margin: 0 auto;
 		}
 

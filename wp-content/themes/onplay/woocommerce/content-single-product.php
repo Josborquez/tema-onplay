@@ -89,7 +89,7 @@ if ( is_array( $category_terms ) && ! empty( $category_terms ) ) {
 				'full',
 				array(
 					'alt'   => esc_attr( $title_clean ),
-					'sizes' => '(max-width: 640px) 100vw, (max-width: 960px) 92vw, 46vw',
+					'sizes' => '(max-width: 640px) 100vw, (max-width: 960px) 380px, 460px',
 				)
 			);
 		} else {
