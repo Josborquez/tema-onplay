@@ -75,7 +75,11 @@ function onplay_home_get_featured_sets( $limit = 6 ) {
 }
 
 /**
- * Cartas recién ingresadas, colapsadas por print_key.
+ * Cartas recién ingresadas, ordenadas por precio DESC (mayor valor primero).
+ *
+ * Pool: 150 SKUs más recientes en stock; colapsados por print_key; ordenados por
+ * `min_price` desc para que el home destaque las cartas de mayor valor dentro de
+ * las recién ingresadas (criterio del dueño).
  *
  * @param int $limit Grupos (impresiones únicas) a devolver.
  * @return array Lista de grupos compatibles con el render del archive.
@@ -112,13 +116,72 @@ function onplay_home_get_recent_cards( $limit = 8 ) {
 		: array();
 
 	if ( function_exists( 'onplay_sort_groups' ) ) {
-		$groups = onplay_sort_groups( $groups, 'new' );
+		$groups = onplay_sort_groups( $groups, 'price-desc' );
 	}
 
 	$groups = array_slice( $groups, 0, $limit );
 
 	set_transient( 'onplay_home_recent_cards_' . $limit, $groups, HOUR_IN_SECONDS );
 	return $groups;
+}
+
+/**
+ * Cartas destacadas para el hero (stack flotante + preview "populares ahora").
+ *
+ * Reusa el pool de recent cards (ya cacheado) y devuelve los primeros `$limit`
+ * grupos — que ya vienen ordenados por valor desc. El hero los usa para:
+ *   - Floating card stack (5 cartas grandes rotadas).
+ *   - Preview "populares ahora" (4 filas compactas bajo el input de búsqueda).
+ *
+ * @param int $limit
+ * @return array
+ */
+function onplay_home_get_hero_cards( $limit = 9 ) {
+	$pool = onplay_home_get_recent_cards( max( 9, (int) $limit ) );
+	return array_slice( $pool, 0, (int) $limit );
+}
+
+/**
+ * Stats numéricos mostrados en el hero (singles en stock, sets, despacho).
+ *
+ * @return array{singles:int,sets:int,despacho:string}
+ */
+function onplay_home_get_stats() {
+	$cache = get_transient( 'onplay_home_stats_v1' );
+	if ( is_array( $cache ) ) {
+		return $cache;
+	}
+
+	global $wpdb;
+
+	$singles = (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->posts} p
+			 INNER JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = %s
+			 WHERE p.post_type = %s AND p.post_status = %s AND m.meta_value = %s",
+			'_stock_status',
+			'product',
+			'publish',
+			'instock'
+		)
+	);
+
+	$sets = (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(DISTINCT tt.term_id) FROM {$wpdb->term_taxonomy} tt
+			 WHERE tt.taxonomy = %s AND tt.parent != 0 AND tt.count > 0",
+			'product_cat'
+		)
+	);
+
+	$stats = array(
+		'singles'  => $singles,
+		'sets'     => $sets,
+		'despacho' => '24-48h',
+	);
+
+	set_transient( 'onplay_home_stats_v1', $stats, HOUR_IN_SECONDS );
+	return $stats;
 }
 
 /**
@@ -133,5 +196,6 @@ add_action(
 			delete_transient( 'onplay_home_featured_sets_' . $i );
 			delete_transient( 'onplay_home_recent_cards_' . $i );
 		}
+		delete_transient( 'onplay_home_stats_v1' );
 	}
 );

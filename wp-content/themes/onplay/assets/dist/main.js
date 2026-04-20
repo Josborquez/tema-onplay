@@ -1110,12 +1110,37 @@
 		},
 	};
 
+	// ---------- Recent cards carousel (home) ---------- //
+	var RecentCarousel = {
+		init: function () {
+			var scroller = document.querySelector("[data-onplay-recent-scroller]");
+			if (!scroller) return;
+			var prev = document.querySelector("[data-onplay-recent-prev]");
+			var next = document.querySelector("[data-onplay-recent-next]");
+			var step = function () {
+				// Un step ≈ ancho visible menos un pelito → ~2 cartas a la vez
+				return Math.max(240, Math.round(scroller.clientWidth * 0.6));
+			};
+			if (prev) {
+				prev.addEventListener("click", function () {
+					scroller.scrollBy({ left: -step(), behavior: "smooth" });
+				});
+			}
+			if (next) {
+				next.addEventListener("click", function () {
+					scroller.scrollBy({ left: step(), behavior: "smooth" });
+				});
+			}
+		},
+	};
+
 	window.onplay.cart = Cart;
 	window.onplay.cartUpdate = CartUpdate;
 	window.onplay.checkoutRut = CheckoutRut;
 	window.onplay.variantTable = VariantTable;
 	window.onplay.search = Search;
 	window.onplay.filters = Filters;
+	window.onplay.recentCarousel = RecentCarousel;
 
 	window.onplay.ready(function () {
 		document.documentElement.classList.add("onplay-ready");
@@ -1125,6 +1150,7 @@
 		VariantTable.init();
 		Search.init();
 		Filters.init();
+		RecentCarousel.init();
 
 		// Click en el botón "Carrito" del header → abre drawer (sin navegar).
 		document.addEventListener("click", function (e) {

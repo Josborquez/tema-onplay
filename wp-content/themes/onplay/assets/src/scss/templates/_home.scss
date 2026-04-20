@@ -352,8 +352,59 @@
 	background: var(--carbon);
 	border-top: 1px solid var(--line);
 
-	&__grid {
-		// El .shop-grid ya define el grid responsivo de 4 columnas; sólo
-		// ajustamos padding vertical si quisiéramos override (no por ahora).
+	&__controls {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	&__arrow {
+		width: 40px;
+		height: 40px;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 16px;
+	}
+
+	&__see-all {
+		margin-left: var(--space-2);
+	}
+
+	&__scroller {
+		display: grid;
+		grid-auto-flow: column;
+		grid-auto-columns: minmax(220px, 1fr);
+		gap: var(--space-4);
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		padding-bottom: var(--space-2);
+		scrollbar-width: thin;
+		scrollbar-color: var(--line-2) transparent;
+
+		&::-webkit-scrollbar {
+			height: 6px;
+		}
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
+		&::-webkit-scrollbar-thumb {
+			background: var(--line-2);
+			border-radius: 3px;
+		}
+	}
+
+	&__slide {
+		scroll-snap-align: start;
+	}
+}
+
+@media (max-width: 640px) {
+	.home-recent__scroller {
+		grid-auto-columns: minmax(180px, 1fr);
+	}
+	.home-recent__see-all {
+		display: none;
 	}
 }
