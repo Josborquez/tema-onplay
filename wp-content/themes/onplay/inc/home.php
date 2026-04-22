@@ -24,12 +24,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Excluye categorías top-level (parent=0) porque son categorías promocionales
  * y la categoría raíz "Magic: The Gathering" (convención del manager).
  *
+ * Por cada set hace una query adicional para obtener un producto representativo
+ * (el más reciente del set) y extrae su `set_code` desde el SKU + `thumb` url.
+ * El volumen es acotado (6 sets) y el resultado completo se cachea 1h.
+ *
  * @param int $limit
- * @return array<int,array{term_id:int,name:string,slug:string,count:int,latest:string}>
+ * @return array<int,array{term_id:int,name:string,slug:string,count:int,latest:string,year:string,set_code:string,thumb:string}>
  */
 function onplay_home_get_featured_sets( $limit = 6 ) {
 	$limit = max( 1, (int) $limit );
-	$cache = get_transient( 'onplay_home_featured_sets_' . $limit );
+	$cache = get_transient( 'onplay_home_featured_sets_v2_' . $limit );
 	if ( is_array( $cache ) ) {
 		return $cache;
 	}
@@ -61,16 +65,55 @@ function onplay_home_get_featured_sets( $limit = 6 ) {
 
 	$sets = array();
 	foreach ( $rows as $r ) {
+		$rep = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT p.ID, pm_sku.meta_value AS sku
+				 FROM {$wpdb->posts} p
+				 INNER JOIN {$wpdb->term_relationships} tr ON tr.object_id = p.ID
+				 INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id
+				 LEFT JOIN {$wpdb->postmeta} pm_sku ON pm_sku.post_id = p.ID AND pm_sku.meta_key = '_sku'
+				 WHERE tt.term_id = %d
+				   AND tt.taxonomy = 'product_cat'
+				   AND p.post_type = 'product'
+				   AND p.post_status = 'publish'
+				 ORDER BY p.post_date DESC
+				 LIMIT 1",
+				(int) $r['term_id']
+			)
+		);
+
+		$set_code = '';
+		$thumb    = '';
+		if ( $rep ) {
+			$pid = (int) $rep->ID;
+			if ( $pid > 0 ) {
+				$img_url = get_the_post_thumbnail_url( $pid, 'medium' );
+				if ( is_string( $img_url ) ) {
+					$thumb = $img_url;
+				}
+			}
+			if ( ! empty( $rep->sku ) && function_exists( 'onplay_parse_sku' ) ) {
+				$parts    = onplay_parse_sku( (string) $rep->sku );
+				$set_code = isset( $parts['set_code'] ) ? (string) $parts['set_code'] : '';
+			}
+		}
+
+		$latest = (string) $r['latest'];
+		$year   = '' !== $latest ? substr( $latest, 0, 4 ) : '';
+
 		$sets[] = array(
-			'term_id' => (int) $r['term_id'],
-			'name'    => (string) $r['name'],
-			'slug'    => (string) $r['slug'],
-			'count'   => (int) $r['count'],
-			'latest'  => (string) $r['latest'],
+			'term_id'  => (int) $r['term_id'],
+			'name'     => (string) $r['name'],
+			'slug'     => (string) $r['slug'],
+			'count'    => (int) $r['count'],
+			'latest'   => $latest,
+			'year'     => $year,
+			'set_code' => $set_code,
+			'thumb'    => $thumb,
 		);
 	}
 
-	set_transient( 'onplay_home_featured_sets_' . $limit, $sets, HOUR_IN_SECONDS );
+	set_transient( 'onplay_home_featured_sets_v2_' . $limit, $sets, HOUR_IN_SECONDS );
 	return $sets;
 }
 
@@ -193,7 +236,7 @@ add_action(
 	'save_post_product',
 	function () {
 		for ( $i = 1; $i <= 12; $i++ ) {
-			delete_transient( 'onplay_home_featured_sets_' . $i );
+			delete_transient( 'onplay_home_featured_sets_v2_' . $i );
 			delete_transient( 'onplay_home_recent_cards_' . $i );
 		}
 		delete_transient( 'onplay_home_stats_v1' );

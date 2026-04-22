@@ -171,3 +171,126 @@ $onplay_cli_audit = function () {
 	) );
 };
 WP_CLI::add_command( 'onplay:audit-enrichment', $onplay_cli_audit );
+
+/**
+ * Seed de páginas institucionales (legales + empresa).
+ *
+ * Crea las páginas definidas en `onplay_pages_catalog()` con contenido
+ * placeholder Gutenberg y meta `_onplay_page_subtitle`. Idempotente: si una
+ * página con ese slug ya existe, la omite (salvo que se pase `--force`).
+ *
+ * ## OPTIONS
+ *
+ * [--force]
+ * : Reemplazar el contenido de páginas existentes. **Destructivo** — úsalo solo
+ *   si sabes que la página no tiene contenido real todavía.
+ *
+ * [--dry-run]
+ * : No crear/actualizar nada; solo reportar qué haría.
+ *
+ * ## EXAMPLES
+ *
+ *     wp onplay:seed-pages --dry-run
+ *     wp onplay:seed-pages
+ *     wp onplay:seed-pages --force
+ */
+$onplay_cli_seed_pages = function ( $args, $assoc_args ) {
+	$force   = isset( $assoc_args['force'] );
+	$dry_run = isset( $assoc_args['dry-run'] );
+
+	if ( ! function_exists( 'onplay_pages_catalog' ) ) {
+		WP_CLI::error( 'inc/pages.php no cargado.' );
+		return;
+	}
+
+	$catalog = onplay_pages_catalog();
+	$total   = count( $catalog );
+	WP_CLI::log(
+		sprintf(
+			'Seed de %d páginas (force=%s, dry-run=%s).',
+			$total,
+			$force ? 'yes' : 'no',
+			$dry_run ? 'yes' : 'no'
+		)
+	);
+
+	$created = 0;
+	$updated = 0;
+	$skipped = 0;
+
+	foreach ( $catalog as $slug => $entry ) {
+		$existing = get_page_by_path( $slug, OBJECT, 'page' );
+		$content  = onplay_pages_render_placeholder( $entry );
+
+		if ( $existing ) {
+			if ( ! $force ) {
+				WP_CLI::log( sprintf( '  skip  %-28s #%d (ya existe)', $slug, $existing->ID ) );
+				$skipped++;
+				continue;
+			}
+
+			if ( $dry_run ) {
+				WP_CLI::log( sprintf( '  would-update %-20s #%d', $slug, $existing->ID ) );
+				$updated++;
+				continue;
+			}
+
+			$res = wp_update_post(
+				array(
+					'ID'           => $existing->ID,
+					'post_title'   => $entry['title'],
+					'post_content' => $content,
+					'post_status'  => 'publish',
+				),
+				true
+			);
+			if ( is_wp_error( $res ) ) {
+				WP_CLI::warning( sprintf( '  error  %s: %s', $slug, $res->get_error_message() ) );
+				continue;
+			}
+			update_post_meta( $existing->ID, '_onplay_page_subtitle', $entry['subtitle'] );
+			update_post_meta( $existing->ID, '_onplay_page_section', $entry['section'] );
+			WP_CLI::log( sprintf( '  updated %-27s #%d', $slug, $existing->ID ) );
+			$updated++;
+			continue;
+		}
+
+		if ( $dry_run ) {
+			WP_CLI::log( sprintf( '  would-create %-20s (%s)', $slug, $entry['section'] ) );
+			$created++;
+			continue;
+		}
+
+		$pid = wp_insert_post(
+			array(
+				'post_title'   => $entry['title'],
+				'post_name'    => $slug,
+				'post_content' => $content,
+				'post_status'  => 'publish',
+				'post_type'    => 'page',
+				'comment_status' => 'closed',
+				'ping_status'    => 'closed',
+			),
+			true
+		);
+		if ( is_wp_error( $pid ) ) {
+			WP_CLI::warning( sprintf( '  error  %s: %s', $slug, $pid->get_error_message() ) );
+			continue;
+		}
+		update_post_meta( $pid, '_onplay_page_subtitle', $entry['subtitle'] );
+		update_post_meta( $pid, '_onplay_page_section', $entry['section'] );
+		WP_CLI::log( sprintf( '  created %-27s #%d', $slug, $pid ) );
+		$created++;
+	}
+
+	WP_CLI::success(
+		sprintf(
+			'created=%d updated=%d skipped=%d total=%d',
+			$created,
+			$updated,
+			$skipped,
+			$total
+		)
+	);
+};
+WP_CLI::add_command( 'onplay:seed-pages', $onplay_cli_seed_pages );

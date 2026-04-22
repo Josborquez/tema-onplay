@@ -24,6 +24,8 @@
 @use "templates/cart";
 @use "templates/checkout";
 @use "templates/home";
+@use "templates/myaccount";
+@use "templates/static-pages";
 
 // Transición de entrada (reutilizable)
 .screen-enter {

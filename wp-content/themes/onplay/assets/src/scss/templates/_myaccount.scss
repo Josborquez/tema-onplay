@@ -1,0 +1,939 @@
+// My Account (/mi-cuenta/) — M-cuenta.
+// Layout 2-col con nav lateral + contenido. Mobile: nav arriba en chips.
+// Espejo visual de cart/checkout: carbon bg + line borders + carmesi accents.
+
+.myaccount {
+	padding: var(--space-10) 0 var(--space-16);
+
+	&__header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: var(--space-3);
+		padding-bottom: var(--space-6);
+		margin-bottom: var(--space-8);
+		border-bottom: 1px solid var(--line);
+	}
+
+	&__kicker {
+		display: block;
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+		margin-bottom: var(--space-2);
+	}
+
+	&__title {
+		font-family: var(--display);
+		font-size: clamp(32px, 4vw, 48px);
+		line-height: 1;
+		text-transform: uppercase;
+		color: var(--bone);
+		margin: 0;
+	}
+
+	&__header-link {
+		color: var(--mid-2);
+		font-size: 12px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		font-family: var(--mono);
+		text-decoration: none;
+		transition: color var(--t-fast);
+
+		&:hover {
+			color: var(--carmesi);
+		}
+	}
+
+	&__layout {
+		display: grid;
+		grid-template-columns: 240px 1fr;
+		gap: var(--space-8);
+		align-items: start;
+
+		@media (max-width: 860px) {
+			grid-template-columns: 1fr;
+			gap: var(--space-5);
+		}
+	}
+
+	&__content {
+		min-width: 0;
+	}
+
+	// Navegación lateral.
+	&__nav {
+		background: var(--carbon);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-md);
+		padding: var(--space-3);
+
+		@media (max-width: 860px) {
+			padding: var(--space-2);
+		}
+	}
+
+	&__nav-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+
+		@media (max-width: 860px) {
+			flex-direction: row;
+			flex-wrap: wrap;
+			gap: var(--space-1);
+		}
+	}
+
+	&__nav-item {
+		&.is-current .myaccount__nav-link,
+		&.is-active .myaccount__nav-link {
+			background: var(--carbon-3);
+			color: var(--bone);
+			border-color: var(--line-2);
+
+			.myaccount__nav-icon {
+				color: var(--carmesi);
+			}
+		}
+	}
+
+	&__nav-link {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		padding: var(--space-3) var(--space-3);
+		border: 1px solid transparent;
+		border-radius: var(--radius-sm);
+		color: var(--mid-2);
+		font-size: 14px;
+		text-decoration: none;
+		transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+
+		&:hover {
+			background: var(--carbon-2);
+			color: var(--bone-2);
+
+			.myaccount__nav-icon {
+				color: var(--carmesi);
+			}
+		}
+	}
+
+	&__nav-icon {
+		display: inline-flex;
+		color: var(--mid);
+		transition: color var(--t-fast);
+	}
+
+	&__nav-label {
+		letter-spacing: 0.02em;
+	}
+}
+
+// Dashboard (saludo + último pedido + tiles).
+.myaccount-dashboard {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-5);
+
+	&__lede {
+		color: var(--mid-2);
+		font-size: 14px;
+		line-height: 1.5;
+		margin: 0;
+
+		a {
+			color: var(--bone);
+			text-decoration: underline;
+			text-decoration-color: var(--line-2);
+			text-underline-offset: 3px;
+			transition: color var(--t-fast), text-decoration-color var(--t-fast);
+
+			&:hover {
+				color: var(--carmesi);
+				text-decoration-color: var(--carmesi);
+			}
+		}
+	}
+
+	&__grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: var(--space-3);
+
+		@media (max-width: 720px) {
+			grid-template-columns: 1fr;
+		}
+	}
+}
+
+.myaccount-card {
+	background: var(--carbon);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+	padding: var(--space-5);
+
+	&__head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: var(--space-3);
+		margin-bottom: var(--space-4);
+	}
+
+	&__kicker {
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+	}
+
+	&__link {
+		font-family: var(--mono);
+		font-size: 12px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+		text-decoration: none;
+		transition: color var(--t-fast);
+
+		&:hover {
+			color: var(--carmesi);
+		}
+	}
+
+	&__body {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	&__meta {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-4);
+		flex-wrap: wrap;
+	}
+
+	&__order-num {
+		font-family: var(--mono);
+		color: var(--bone);
+		font-size: 18px;
+	}
+
+	&__order-date {
+		color: var(--mid-2);
+		font-size: 13px;
+	}
+
+	&__status-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-3);
+	}
+
+	&__status {
+		font-family: var(--mono);
+		font-size: 11px;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		padding: 4px 10px;
+		border-radius: var(--radius-full);
+		border: 1px solid var(--line-2);
+		color: var(--mid-2);
+
+		&--completed,
+		&--processing {
+			color: var(--green);
+			border-color: color-mix(in srgb, var(--green) 40%, transparent);
+		}
+
+		&--on-hold,
+		&--pending {
+			color: var(--amber);
+			border-color: color-mix(in srgb, var(--amber) 40%, transparent);
+		}
+
+		&--cancelled,
+		&--failed,
+		&--refunded {
+			color: var(--carmesi);
+			border-color: color-mix(in srgb, var(--carmesi) 40%, transparent);
+		}
+	}
+
+	&__total {
+		font-family: var(--display);
+		font-size: 24px;
+		color: var(--bone);
+	}
+
+	&__empty {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--space-3);
+	}
+
+	&__empty-text {
+		color: var(--mid-2);
+		font-size: 14px;
+		margin: 0;
+	}
+}
+
+.myaccount-tile {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	padding: var(--space-4);
+	background: var(--carbon);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+	text-decoration: none;
+	transition: border-color var(--t-fast), transform var(--t-fast);
+
+	&:hover {
+		border-color: var(--line-2);
+		transform: translateY(-2px);
+
+		.myaccount-tile__cta {
+			color: var(--carmesi);
+		}
+	}
+
+	&__kicker {
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+	}
+
+	&__title {
+		font-family: var(--display);
+		font-size: 22px;
+		color: var(--bone);
+		text-transform: uppercase;
+	}
+
+	&__cta {
+		font-family: var(--mono);
+		font-size: 12px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+		margin-top: var(--space-2);
+		transition: color var(--t-fast);
+	}
+}
+
+// Login + registro (form-login.php).
+.myaccount-auth {
+	display: grid;
+	gap: var(--space-5);
+
+	&--split {
+		grid-template-columns: 1fr 1fr;
+
+		@media (max-width: 820px) {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	&--solo {
+		max-width: 480px;
+		margin: 0 auto;
+	}
+
+	&__panel {
+		background: var(--carbon);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-md);
+		padding: var(--space-6);
+	}
+
+	&__head {
+		margin-bottom: var(--space-4);
+		padding-bottom: var(--space-3);
+		border-bottom: 1px dashed var(--line);
+	}
+
+	&__kicker {
+		display: block;
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+		margin-bottom: var(--space-1);
+	}
+
+	&__title {
+		font-family: var(--display);
+		font-size: 28px;
+		color: var(--bone);
+		text-transform: uppercase;
+		margin: 0;
+		line-height: 1;
+	}
+
+	&__form {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	&__row {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+		margin: 0;
+
+		label {
+			font-family: var(--mono);
+			font-size: 11px;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--mid-2);
+
+			.required {
+				color: var(--carmesi);
+			}
+		}
+	}
+
+	&__input {
+		width: 100%;
+		background: var(--carbon-2);
+		border: 1px solid var(--line-2);
+		border-radius: var(--radius-sm);
+		color: var(--bone);
+		padding: 10px 12px;
+		font-size: 14px;
+		font-family: var(--body);
+		transition: border-color var(--t-fast), background var(--t-fast);
+
+		&:focus {
+			outline: none;
+			border-color: var(--carmesi);
+			background: var(--carbon-3);
+		}
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-3);
+		flex-wrap: wrap;
+		margin-top: var(--space-2);
+	}
+
+	&__remember {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		font-size: 13px;
+		color: var(--mid-2);
+		cursor: pointer;
+
+		input {
+			accent-color: var(--carmesi);
+		}
+	}
+
+	&__submit {
+		min-width: 160px;
+	}
+
+	&__lost {
+		margin: var(--space-3) 0 0;
+		font-size: 13px;
+
+		a {
+			color: var(--mid-2);
+			text-decoration: none;
+			transition: color var(--t-fast);
+
+			&:hover {
+				color: var(--carmesi);
+			}
+		}
+	}
+
+	&__hint {
+		font-size: 13px;
+		color: var(--mid-2);
+		margin: 0;
+		line-height: 1.5;
+	}
+}
+
+// Orders list (cards en vez de tabla).
+.myaccount-orders {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+
+	&__pagination {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--space-3);
+		margin-top: var(--space-5);
+	}
+}
+
+.myaccount-order {
+	background: var(--carbon);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+	padding: var(--space-4) var(--space-5);
+	display: grid;
+	gap: var(--space-3);
+
+	&__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-3);
+		padding-bottom: var(--space-3);
+		border-bottom: 1px dashed var(--line);
+	}
+
+	&__id {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__kicker {
+		font-size: 10px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+	}
+
+	&__num {
+		font-family: var(--mono);
+		font-size: 18px;
+		color: var(--bone);
+		text-decoration: none;
+
+		&:hover {
+			color: var(--carmesi);
+		}
+	}
+
+	&__status {
+		font-family: var(--mono);
+		font-size: 11px;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		padding: 4px 10px;
+		border-radius: var(--radius-full);
+		border: 1px solid var(--line-2);
+		color: var(--mid-2);
+
+		&--completed,
+		&--processing {
+			color: var(--green);
+			border-color: color-mix(in srgb, var(--green) 40%, transparent);
+		}
+
+		&--on-hold,
+		&--pending {
+			color: var(--amber);
+			border-color: color-mix(in srgb, var(--amber) 40%, transparent);
+		}
+
+		&--cancelled,
+		&--failed,
+		&--refunded {
+			color: var(--carmesi);
+			border-color: color-mix(in srgb, var(--carmesi) 40%, transparent);
+		}
+	}
+
+	&__meta {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: var(--space-3);
+
+		@media (max-width: 560px) {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+
+	&__meta-item {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__meta-label {
+		font-size: 10px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--mid);
+	}
+
+	&__meta-value {
+		font-size: 14px;
+		color: var(--bone-2);
+
+		&--total {
+			font-family: var(--display);
+			font-size: 18px;
+			color: var(--bone);
+		}
+	}
+
+	&__actions {
+		display: flex;
+		gap: var(--space-2);
+		flex-wrap: wrap;
+		padding-top: var(--space-3);
+		border-top: 1px dashed var(--line);
+	}
+
+	&__action {
+		font-size: 12px;
+		padding: 6px 14px;
+	}
+}
+
+// Empty state (no orders).
+.myaccount-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--space-3);
+	padding: var(--space-8);
+	background: var(--carbon);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+
+	&__kicker {
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+	}
+
+	&__title {
+		font-family: var(--display);
+		font-size: 28px;
+		color: var(--bone);
+		text-transform: uppercase;
+		margin: 0;
+	}
+
+	&__text {
+		color: var(--mid-2);
+		font-size: 14px;
+		margin: 0;
+	}
+}
+
+// Addresses (my-address.php).
+.myaccount-addresses {
+	display: grid;
+	gap: var(--space-3);
+
+	&__lede {
+		color: var(--mid-2);
+		font-size: 14px;
+		margin: 0 0 var(--space-4);
+	}
+
+	&--split {
+		grid-template-columns: 1fr 1fr;
+
+		@media (max-width: 720px) {
+			grid-template-columns: 1fr;
+		}
+	}
+}
+
+.myaccount-address {
+	background: var(--carbon);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+	padding: var(--space-5);
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+
+	&--empty {
+		border-style: dashed;
+	}
+
+	&__head {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+		padding-bottom: var(--space-3);
+		border-bottom: 1px dashed var(--line);
+	}
+
+	&__kicker {
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+	}
+
+	&__title {
+		font-family: var(--display);
+		font-size: 22px;
+		color: var(--bone);
+		text-transform: uppercase;
+		margin: 0;
+	}
+
+	&__body {
+		color: var(--bone-2);
+		font-size: 14px;
+		font-style: normal;
+		line-height: 1.6;
+
+		address,
+		br {
+			display: block;
+		}
+	}
+
+	&__empty-text {
+		color: var(--mid-2);
+		font-style: italic;
+	}
+
+	&__action {
+		align-self: flex-start;
+		margin-top: auto;
+		font-size: 12px;
+		padding: 6px 14px;
+	}
+}
+
+// Formularios genéricos (edit-account, edit-address, lost-password, reset).
+.myaccount-form {
+	background: var(--carbon);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+	padding: var(--space-6);
+
+	&--narrow {
+		max-width: 520px;
+	}
+
+	&__head {
+		margin-bottom: var(--space-5);
+		padding-bottom: var(--space-3);
+		border-bottom: 1px dashed var(--line);
+	}
+
+	&__kicker {
+		display: block;
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+		margin-bottom: var(--space-1);
+	}
+
+	&__title {
+		font-family: var(--display);
+		font-size: 28px;
+		color: var(--bone);
+		text-transform: uppercase;
+		margin: 0;
+		line-height: 1;
+	}
+
+	&__lede {
+		color: var(--mid-2);
+		font-size: 14px;
+		margin: 0 0 var(--space-4);
+		line-height: 1.5;
+	}
+
+	&__fields {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	&__grid {
+		display: grid;
+		gap: var(--space-3);
+
+		&--2 {
+			grid-template-columns: 1fr 1fr;
+
+			@media (max-width: 560px) {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		// Form-edit-address usa columnas generadas por woocommerce_form_field
+		// con clases form-row-first/form-row-last/form-row-wide. Normalizamos.
+		.form-row {
+			margin: 0;
+
+			&.form-row-first,
+			&.form-row-last {
+				grid-column: span 1;
+			}
+
+			&.form-row-wide {
+				grid-column: 1 / -1;
+			}
+		}
+	}
+
+	// WooCommerce address fields (form-edit-address) renderizan con sus clases
+	// nativas — mapeamos su look al nuestro.
+	.woocommerce-address-fields__field-wrapper {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-3);
+
+		@media (max-width: 560px) {
+			grid-template-columns: 1fr;
+		}
+
+		.form-row {
+			margin: 0;
+
+			&.form-row-wide {
+				grid-column: 1 / -1;
+			}
+
+			label {
+				display: block;
+				font-family: var(--mono);
+				font-size: 11px;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--mid-2);
+				margin-bottom: var(--space-1);
+
+				.required {
+					color: var(--carmesi);
+				}
+			}
+
+			input[type="text"],
+			input[type="email"],
+			input[type="tel"],
+			input[type="number"],
+			input[type="password"],
+			textarea,
+			select,
+			.select2-selection {
+				width: 100%;
+				background: var(--carbon-2);
+				border: 1px solid var(--line-2);
+				border-radius: var(--radius-sm);
+				color: var(--bone);
+				padding: 10px 12px;
+				font-size: 14px;
+				font-family: var(--body);
+
+				&:focus {
+					outline: none;
+					border-color: var(--carmesi);
+					background: var(--carbon-3);
+				}
+			}
+
+			.select2-selection {
+				height: auto;
+				padding: 6px 10px;
+			}
+		}
+	}
+
+	&__row {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+		margin: 0;
+
+		label {
+			font-family: var(--mono);
+			font-size: 11px;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--mid-2);
+
+			.required {
+				color: var(--carmesi);
+			}
+		}
+	}
+
+	&__input {
+		width: 100%;
+		background: var(--carbon-2);
+		border: 1px solid var(--line-2);
+		border-radius: var(--radius-sm);
+		color: var(--bone);
+		padding: 10px 12px;
+		font-size: 14px;
+		font-family: var(--body);
+		transition: border-color var(--t-fast), background var(--t-fast);
+
+		&:focus {
+			outline: none;
+			border-color: var(--carmesi);
+			background: var(--carbon-3);
+		}
+	}
+
+	&__hint {
+		display: block;
+		font-size: 12px;
+		color: var(--mid-2);
+		margin-top: var(--space-1);
+		line-height: 1.5;
+	}
+
+	&__fieldset {
+		border: 1px solid var(--line);
+		border-radius: var(--radius-sm);
+		padding: var(--space-4);
+		margin: var(--space-3) 0 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	&__legend {
+		font-family: var(--mono);
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+		padding: 0 var(--space-2);
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		margin-top: var(--space-4);
+		padding-top: var(--space-4);
+		border-top: 1px dashed var(--line);
+	}
+}

@@ -14,10 +14,13 @@ define( 'ONPLAY_THEME_DIR', get_template_directory() );
 define( 'ONPLAY_THEME_URI', get_template_directory_uri() );
 
 require_once ONPLAY_THEME_DIR . '/inc/setup.php';
+require_once ONPLAY_THEME_DIR . '/inc/security.php';
+require_once ONPLAY_THEME_DIR . '/inc/seo.php';
 require_once ONPLAY_THEME_DIR . '/inc/enqueue.php';
 require_once ONPLAY_THEME_DIR . '/inc/taxonomies.php';
 require_once ONPLAY_THEME_DIR . '/inc/meta-to-taxonomy.php';
 require_once ONPLAY_THEME_DIR . '/inc/scryfall-enrich.php';
+require_once ONPLAY_THEME_DIR . '/inc/pages.php';
 require_once ONPLAY_THEME_DIR . '/inc/cli.php';
 require_once ONPLAY_THEME_DIR . '/inc/woocommerce.php';
 require_once ONPLAY_THEME_DIR . '/inc/variants-query.php';

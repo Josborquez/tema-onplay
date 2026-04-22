@@ -82,4 +82,4 @@ El pipeline oficial de ingesta es **onplay-manager** (`github.com/Josborquez/onp
 
 ## Licencia
 
-GPL-2.0-or-later. Propiedad de Onplay Games SpA.
+GPL-2.0-or-later. Propiedad de Comercializadora y Distribuidora BM Limitada (RUT 77.862.085-5).

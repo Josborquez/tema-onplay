@@ -1,0 +1,695 @@
+// Templates estáticos compartidos: page, 404, search, single, archive.
+// Layout narrow + .prose + hero tipográfico + empty-states.
+
+// ---------------------------------------------------------------
+// Wrapper común
+// ---------------------------------------------------------------
+.static-page {
+	padding-block: var(--space-16) var(--space-20);
+	color: var(--bone-2);
+
+	// Densidad reducida del container (no usamos 1440 acá)
+	&__wrap {
+		max-width: 960px;
+	}
+
+	&__hero {
+		padding-bottom: var(--space-10);
+		border-bottom: 1px solid var(--line);
+		margin-bottom: var(--space-12);
+
+		.container {
+			max-width: 960px;
+			display: flex;
+			flex-direction: column;
+			gap: var(--space-3);
+		}
+	}
+
+	&__breadcrumbs {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		font-size: 11px;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+		margin-bottom: var(--space-4);
+
+		a {
+			color: var(--mid-2);
+			text-decoration: none;
+			transition: color var(--t-fast);
+
+			&:hover,
+			&:focus-visible {
+				color: var(--bone);
+			}
+		}
+
+		> span[aria-hidden="true"] {
+			color: var(--line-2);
+		}
+
+		> span:last-child {
+			color: var(--bone);
+		}
+	}
+
+	&__kicker {
+		font-size: 11px;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--carmesi);
+	}
+
+	&__title {
+		color: var(--bone);
+
+		.is-accent {
+			color: var(--carmesi);
+		}
+	}
+
+	&__lede {
+		max-width: 620px;
+		color: var(--mid-2);
+		font-size: 17px;
+		line-height: 1.6;
+		margin: 0;
+
+		a {
+			color: var(--bone);
+			text-decoration: underline;
+			text-decoration-color: var(--carmesi);
+			text-underline-offset: 3px;
+			transition: color var(--t-fast);
+
+			&:hover,
+			&:focus-visible {
+				color: var(--carmesi);
+			}
+		}
+	}
+
+	&__meta {
+		font-size: 11px;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+		margin-top: var(--space-4);
+	}
+
+	&__body {
+		max-width: 960px;
+	}
+
+	&__thumb {
+		max-width: 960px;
+		margin-bottom: var(--space-10);
+
+		img {
+			width: 100%;
+			height: auto;
+			border-radius: var(--radius-md);
+			border: 1px solid var(--line);
+		}
+	}
+
+	&__pagination {
+		display: flex;
+		justify-content: center;
+		gap: var(--space-3);
+		margin-top: var(--space-12);
+		padding-top: var(--space-8);
+		border-top: 1px solid var(--line);
+		font-size: 12px;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+
+		.page-numbers {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 36px;
+			height: 36px;
+			padding: 0 var(--space-3);
+			border: 1px solid var(--line);
+			border-radius: var(--radius-md);
+			color: var(--bone-2);
+			text-decoration: none;
+			transition: border-color var(--t-fast), color var(--t-fast);
+
+			&:hover,
+			&:focus-visible {
+				border-color: var(--carmesi);
+				color: var(--bone);
+			}
+
+			&.current {
+				background: var(--carmesi);
+				border-color: var(--carmesi);
+				color: var(--bone);
+			}
+
+			&.dots {
+				border-color: transparent;
+				color: var(--mid);
+			}
+		}
+	}
+
+	&__tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+		margin-top: var(--space-10);
+		padding-top: var(--space-6);
+		border-top: 1px solid var(--line);
+		list-style: none;
+		padding-left: 0;
+		font-size: 11px;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+
+		li a {
+			display: inline-block;
+			padding: var(--space-1) var(--space-3);
+			border: 1px solid var(--line);
+			border-radius: var(--radius-full);
+			color: var(--mid-2);
+			text-decoration: none;
+			transition: border-color var(--t-fast), color var(--t-fast);
+
+			&:hover,
+			&:focus-visible {
+				border-color: var(--carmesi);
+				color: var(--bone);
+			}
+		}
+	}
+
+	&__comments {
+		max-width: 760px;
+		margin-top: var(--space-12);
+		padding-top: var(--space-8);
+		border-top: 1px solid var(--line);
+	}
+}
+
+// ---------------------------------------------------------------
+// .prose — estilos para contenido de .the_content() en páginas
+// ---------------------------------------------------------------
+.prose {
+	max-width: 760px;
+	color: var(--bone-2);
+	font-size: 16px;
+	line-height: 1.75;
+
+	> * + * {
+		margin-top: var(--space-5);
+	}
+
+	p {
+		margin: 0;
+	}
+
+	h2,
+	h3,
+	h4 {
+		font-family: var(--display);
+		color: var(--bone);
+		text-transform: uppercase;
+		letter-spacing: 0.02em;
+		line-height: 1.05;
+		scroll-margin-top: 100px; // offset sticky header
+	}
+
+	h2 {
+		font-size: 32px;
+		margin-top: var(--space-12);
+		padding-top: var(--space-8);
+		border-top: 1px solid var(--line);
+
+		&:first-child {
+			margin-top: 0;
+			padding-top: 0;
+			border-top: 0;
+		}
+	}
+
+	h3 {
+		font-size: 22px;
+		margin-top: var(--space-10);
+	}
+
+	h4 {
+		font-size: 16px;
+		margin-top: var(--space-8);
+		letter-spacing: 0.08em;
+	}
+
+	a {
+		color: var(--bone);
+		text-decoration: underline;
+		text-decoration-color: var(--carmesi);
+		text-underline-offset: 3px;
+		transition: color var(--t-fast);
+
+		&:hover,
+		&:focus-visible {
+			color: var(--carmesi);
+		}
+	}
+
+	strong,
+	b {
+		color: var(--bone);
+		font-weight: 600;
+	}
+
+	em {
+		color: var(--bone-2);
+	}
+
+	ul,
+	ol {
+		padding-left: var(--space-5);
+
+		li + li {
+			margin-top: var(--space-2);
+		}
+
+		li::marker {
+			color: var(--carmesi);
+		}
+	}
+
+	ul ul,
+	ol ol,
+	ul ol,
+	ol ul {
+		margin-top: var(--space-2);
+	}
+
+	blockquote {
+		margin: var(--space-8) 0;
+		padding: var(--space-4) var(--space-6);
+		border-left: 3px solid var(--carmesi);
+		background: var(--carbon);
+		color: var(--bone);
+		font-style: italic;
+
+		p + p {
+			margin-top: var(--space-3);
+		}
+
+		cite {
+			display: block;
+			margin-top: var(--space-3);
+			font-family: var(--mono);
+			font-size: 12px;
+			font-style: normal;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--mid-2);
+		}
+	}
+
+	code {
+		padding: 2px 6px;
+		background: var(--carbon-2);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-sm);
+		font-family: var(--mono);
+		font-size: 0.92em;
+		color: var(--gold);
+	}
+
+	pre {
+		margin: var(--space-6) 0;
+		padding: var(--space-5);
+		background: var(--carbon);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-md);
+		overflow-x: auto;
+		font-family: var(--mono);
+		font-size: 13px;
+		line-height: 1.6;
+
+		code {
+			padding: 0;
+			background: transparent;
+			border: 0;
+			border-radius: 0;
+			color: inherit;
+		}
+	}
+
+	hr {
+		border: 0;
+		height: 1px;
+		background: var(--line);
+		margin: var(--space-10) 0;
+	}
+
+	img,
+	figure {
+		max-width: 100%;
+		height: auto;
+		border-radius: var(--radius-md);
+	}
+
+	figure {
+		margin: var(--space-8) 0;
+
+		figcaption {
+			margin-top: var(--space-2);
+			font-family: var(--mono);
+			font-size: 12px;
+			color: var(--mid-2);
+			text-transform: uppercase;
+			letter-spacing: 0.08em;
+		}
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		margin: var(--space-6) 0;
+		font-size: 14px;
+
+		th,
+		td {
+			padding: var(--space-3) var(--space-4);
+			border-bottom: 1px solid var(--line);
+			text-align: left;
+			vertical-align: top;
+		}
+
+		th {
+			font-family: var(--mono);
+			font-size: 11px;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+			color: var(--mid-2);
+			background: var(--carbon);
+		}
+
+		tr:last-child td {
+			border-bottom: 0;
+		}
+	}
+
+	// Anchor permalinks (Gutenberg / Rank Math inyectan ids en h2/h3)
+	:target {
+		animation: onplay-target-flash 1.8s ease;
+	}
+}
+
+@keyframes onplay-target-flash {
+	0% {
+		background: color-mix(in srgb, var(--carmesi) 18%, transparent);
+	}
+	100% {
+		background: transparent;
+	}
+}
+
+// ---------------------------------------------------------------
+// 404
+// ---------------------------------------------------------------
+.static-404 {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--space-5);
+	max-width: 720px;
+
+	&__kicker {
+		font-size: 12px;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--carmesi);
+	}
+
+	&__title {
+		color: var(--bone);
+		margin: 0;
+
+		.is-accent {
+			color: var(--carmesi);
+		}
+	}
+
+	&__lede {
+		max-width: 620px;
+		color: var(--mid-2);
+		font-size: 17px;
+		line-height: 1.6;
+		margin: 0;
+	}
+
+	&__search {
+		display: flex;
+		gap: var(--space-2);
+		width: 100%;
+		max-width: 560px;
+		margin-top: var(--space-4);
+
+		&-input {
+			flex: 1;
+		}
+	}
+
+	&__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+		margin-top: var(--space-4);
+	}
+}
+
+// ---------------------------------------------------------------
+// Search (WP nativo)
+// ---------------------------------------------------------------
+.search-results {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+
+	&__item {
+		border-bottom: 1px solid var(--line);
+
+		&:first-child {
+			border-top: 1px solid var(--line);
+		}
+	}
+
+	&__link {
+		display: block;
+		padding: var(--space-6) 0;
+		text-decoration: none;
+		color: var(--bone-2);
+		transition: color var(--t-fast), padding-left var(--t-base);
+
+		&:hover,
+		&:focus-visible {
+			color: var(--bone);
+			padding-left: var(--space-2);
+		}
+	}
+
+	&__type {
+		display: inline-block;
+		font-size: 10px;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--carmesi);
+		margin-bottom: var(--space-2);
+	}
+
+	&__title {
+		color: var(--bone);
+		margin: 0 0 var(--space-2);
+	}
+
+	&__excerpt {
+		color: var(--mid-2);
+		font-size: 15px;
+		line-height: 1.6;
+		margin: 0 0 var(--space-3);
+	}
+
+	&__cta {
+		display: inline-block;
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--carmesi);
+	}
+}
+
+// ---------------------------------------------------------------
+// Archive (blog)
+// ---------------------------------------------------------------
+.archive-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+	gap: var(--space-6);
+
+	&__item {
+		background: var(--carbon);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-md);
+		transition: border-color var(--t-fast);
+
+		&:hover,
+		&:focus-within {
+			border-color: var(--carmesi);
+		}
+	}
+
+	&__link {
+		display: block;
+		padding: var(--space-6);
+		text-decoration: none;
+		color: var(--bone-2);
+	}
+
+	&__meta {
+		display: block;
+		font-size: 10px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--mid-2);
+		margin-bottom: var(--space-3);
+	}
+
+	&__title {
+		color: var(--bone);
+		margin: 0 0 var(--space-3);
+	}
+
+	&__excerpt {
+		color: var(--mid-2);
+		font-size: 14px;
+		line-height: 1.6;
+		margin: 0 0 var(--space-4);
+	}
+
+	&__cta {
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--carmesi);
+	}
+}
+
+// ---------------------------------------------------------------
+// Empty-state compartido
+// ---------------------------------------------------------------
+.static-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--space-5);
+	padding: var(--space-10) 0;
+
+	&__lede {
+		color: var(--mid-2);
+		font-size: 17px;
+		line-height: 1.6;
+		margin: 0;
+	}
+
+	&__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+}
+
+// ---------------------------------------------------------------
+// Searchform nativo (searchform.php)
+// ---------------------------------------------------------------
+.searchform {
+	width: 100%;
+	max-width: 560px;
+
+	&__wrap {
+		position: relative;
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	&__icon {
+		position: absolute;
+		left: var(--space-3);
+		color: var(--mid-2);
+		pointer-events: none;
+	}
+
+	&__input {
+		flex: 1;
+		padding-left: var(--space-8);
+	}
+
+	&__submit {
+		flex-shrink: 0;
+	}
+}
+
+// ---------------------------------------------------------------
+// Responsive
+// ---------------------------------------------------------------
+@media (max-width: 720px) {
+	.static-page {
+		padding-block: var(--space-10) var(--space-12);
+
+		&__hero {
+			padding-bottom: var(--space-6);
+			margin-bottom: var(--space-8);
+		}
+	}
+
+	.prose {
+		font-size: 15px;
+
+		h2 {
+			font-size: 26px;
+		}
+
+		h3 {
+			font-size: 20px;
+		}
+	}
+
+	.static-404__search {
+		flex-direction: column;
+	}
+
+	.archive-list {
+		grid-template-columns: 1fr;
+	}
+
+	.searchform__wrap {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.searchform__icon {
+		top: 14px;
+	}
+
+	.searchform__submit {
+		width: 100%;
+	}
+}

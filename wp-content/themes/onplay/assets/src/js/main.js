@@ -733,6 +733,145 @@
 	}
 
 	// ──────────────────────────────────────────────────────────
+	// HeroSearch — autocomplete reactivo del hero (panel inline)
+	// Comparte endpoint y nonce con Search (window.onplaySearch).
+	// Cuando el input está vacío, restaura las filas "Populares ahora" renderizadas
+	// server-side. Cuando hay >= 2 chars, reemplaza con el resultado del endpoint
+	// y swapea el label del header.
+	// ──────────────────────────────────────────────────────────
+	var HeroSearch = {
+		form: null,
+		input: null,
+		panel: null,
+		head: null,
+		body: null,
+		labelPopular: "",
+		labelSuggestions: "",
+		originalHTML: "",
+		controller: null,
+		debounceTimer: null,
+
+		init: function () {
+			HeroSearch.form = document.querySelector("[data-onplay-hero-search]");
+			if (!HeroSearch.form) return;
+			HeroSearch.input = HeroSearch.form.querySelector("[data-onplay-hero-input]");
+			HeroSearch.panel = document.querySelector("[data-onplay-hero-panel]");
+			if (!HeroSearch.input || !HeroSearch.panel) return;
+			HeroSearch.head = HeroSearch.panel.querySelector("[data-onplay-hero-head]");
+			HeroSearch.body = HeroSearch.panel.querySelector("[data-onplay-hero-body]");
+			if (!HeroSearch.head || !HeroSearch.body) return;
+			if (!window.onplaySearch || !window.onplaySearch.ajaxUrl) return;
+
+			HeroSearch.labelPopular = HeroSearch.head.getAttribute("data-label-popular") || "Populares ahora";
+			HeroSearch.labelSuggestions = HeroSearch.head.getAttribute("data-label-suggestions") || "Sugerencias";
+			HeroSearch.originalHTML = HeroSearch.body.innerHTML;
+
+			HeroSearch.input.addEventListener("input", HeroSearch.onInput);
+		},
+
+		onInput: function () {
+			clearTimeout(HeroSearch.debounceTimer);
+			var q = HeroSearch.input.value.trim();
+
+			if (q.length === 0) {
+				HeroSearch.restore();
+				return;
+			}
+			if (q.length < 2) {
+				return; // respeta el mínimo del endpoint sin flashear estado.
+			}
+
+			HeroSearch.debounceTimer = setTimeout(function () {
+				HeroSearch.fetch(q);
+			}, 200);
+		},
+
+		restore: function () {
+			HeroSearch.head.textContent = HeroSearch.labelPopular;
+			HeroSearch.body.innerHTML = HeroSearch.originalHTML;
+			if (HeroSearch.controller) HeroSearch.controller.abort();
+		},
+
+		fetch: function (q) {
+			if (HeroSearch.controller) HeroSearch.controller.abort();
+			HeroSearch.controller = new AbortController();
+
+			var url =
+				window.onplaySearch.ajaxUrl +
+				"?action=onplay_search&nonce=" +
+				encodeURIComponent(window.onplaySearch.nonce) +
+				"&q=" +
+				encodeURIComponent(q);
+
+			fetch(url, {
+				method: "GET",
+				credentials: "same-origin",
+				headers: { "X-Requested-With": "XMLHttpRequest" },
+				signal: HeroSearch.controller.signal,
+			})
+				.then(function (res) {
+					if (!res.ok) throw new Error("HTTP " + res.status);
+					return res.json();
+				})
+				.then(function (data) {
+					var items = data && data.success && data.data ? data.data.results || [] : [];
+					HeroSearch.render(items);
+				})
+				.catch(function (err) {
+					if (err.name === "AbortError") return;
+					console.error("[onplay] hero search failed", err);
+					HeroSearch.render([]);
+				});
+		},
+
+		render: function (items) {
+			HeroSearch.head.textContent = HeroSearch.labelSuggestions;
+
+			if (!items || items.length === 0) {
+				var empty = (window.onplaySearch.i18n && window.onplaySearch.i18n.noResults) || "Sin resultados locales";
+				HeroSearch.body.innerHTML = '<div class="home-hero__sugg-empty">' + escapeHTML(empty) + "</div>";
+				return;
+			}
+
+			var html = items
+				.slice(0, 4)
+				.map(function (r) {
+					var setCode = (r.set_code || "").toLowerCase();
+					var setIcon = setCode
+						? '<i class="ss ss-' + escapeHTML(setCode) + ' ss-fw set-icon" style="font-size:11px" aria-hidden="true"></i>'
+						: "";
+					var thumb = r.thumb
+						? '<img class="home-hero__sugg-img" src="' + escapeHTML(r.thumb) + '" alt="" loading="lazy" />'
+						: '<span class="home-hero__sugg-img home-hero__sugg-img--ph" aria-hidden="true"></span>';
+					return (
+						'<a class="home-hero__sugg" href="' +
+						escapeHTML(r.permalink) +
+						'">' +
+						thumb +
+						'<span class="home-hero__sugg-body">' +
+						'<span class="home-hero__sugg-name">' +
+						escapeHTML(r.name) +
+						"</span>" +
+						'<span class="home-hero__sugg-meta">' +
+						setIcon +
+						"<span>" +
+						escapeHTML(r.set_name || r.set_code || "") +
+						"</span>" +
+						"</span>" +
+						"</span>" +
+						'<span class="home-hero__sugg-price">' +
+						escapeHTML(r.min_price_formatted) +
+						"</span>" +
+						"</a>"
+					);
+				})
+				.join("");
+
+			HeroSearch.body.innerHTML = html;
+		},
+	};
+
+	// ──────────────────────────────────────────────────────────
 	// Filters — Módulo 6: sidebar facetado del listado
 	// ──────────────────────────────────────────────────────────
 	var Filters = {
@@ -1139,6 +1278,7 @@
 	window.onplay.checkoutRut = CheckoutRut;
 	window.onplay.variantTable = VariantTable;
 	window.onplay.search = Search;
+	window.onplay.heroSearch = HeroSearch;
 	window.onplay.filters = Filters;
 	window.onplay.recentCarousel = RecentCarousel;
 
@@ -1149,6 +1289,7 @@
 		CheckoutRut.init();
 		VariantTable.init();
 		Search.init();
+		HeroSearch.init();
 		Filters.init();
 		RecentCarousel.init();
 

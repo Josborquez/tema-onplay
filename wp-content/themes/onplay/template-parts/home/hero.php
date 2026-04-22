@@ -9,8 +9,10 @@
  *
  * Los datos del stack + preview vienen de `onplay_home_get_hero_cards()` — reusan
  * el pool "recient + mayor valor" ya ordenado por `onplay_home_get_recent_cards()`.
- * El buscador submite `GET /tienda/?q=` (no autocomplete dinámico aquí — el input del
- * header ya tiene autocomplete; duplicar el listener requería refactor de Search.init).
+ * El buscador combina submit nativo (`?q=` a /tienda/) + autocomplete reactivo:
+ * el módulo JS `HeroSearch` llama al endpoint `onplay_search` y reemplaza las filas
+ * del panel cuando el usuario teclea; cuando vacío, restaura las "Populares ahora"
+ * server-side. El header del panel alterna entre "Populares ahora" y "Sugerencias".
  *
  * @package Onplay
  */
@@ -164,7 +166,13 @@ $positions = array(
 				?>
 			</p>
 
-			<form class="home-hero__search" role="search" action="<?php echo esc_url( $shop_url ); ?>" method="get">
+			<form
+				class="home-hero__search"
+				role="search"
+				action="<?php echo esc_url( $shop_url ); ?>"
+				method="get"
+				data-onplay-hero-search
+			>
 				<label for="home-hero-q" class="screen-reader-text"><?php esc_html_e( 'Buscar cartas', 'onplay' ); ?></label>
 				<svg class="home-hero__search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 					<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
@@ -176,6 +184,7 @@ $positions = array(
 					class="home-hero__input"
 					placeholder="<?php esc_attr_e( 'Lightning Bolt, Ragavan, Force of Negation…', 'onplay' ); ?>"
 					autocomplete="off"
+					data-onplay-hero-input
 				/>
 				<button type="submit" class="btn btn-primary home-hero__btn">
 					<?php esc_html_e( 'Buscar', 'onplay' ); ?>
@@ -183,13 +192,20 @@ $positions = array(
 			</form>
 
 			<?php if ( ! empty( $preview ) ) : ?>
-				<div class="home-hero__suggs" aria-label="<?php esc_attr_e( 'Populares ahora', 'onplay' ); ?>">
-					<div class="home-hero__suggs-head mono"><?php esc_html_e( 'Populares ahora', 'onplay' ); ?></div>
-					<?php
-					foreach ( $preview as $g ) {
-						$render_preview_row( $g );
-					}
-					?>
+				<div class="home-hero__suggs" aria-label="<?php esc_attr_e( 'Populares ahora', 'onplay' ); ?>" data-onplay-hero-panel>
+					<div
+						class="home-hero__suggs-head mono"
+						data-onplay-hero-head
+						data-label-popular="<?php esc_attr_e( 'Populares ahora', 'onplay' ); ?>"
+						data-label-suggestions="<?php esc_attr_e( 'Sugerencias', 'onplay' ); ?>"
+					><?php esc_html_e( 'Populares ahora', 'onplay' ); ?></div>
+					<div class="home-hero__suggs-body" data-onplay-hero-body>
+						<?php
+						foreach ( $preview as $g ) {
+							$render_preview_row( $g );
+						}
+						?>
+					</div>
 				</div>
 			<?php endif; ?>
 

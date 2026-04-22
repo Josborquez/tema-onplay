@@ -97,13 +97,61 @@ add_action(
 add_action(
 	'wp_head',
 	function () {
+		$fonts   = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@1,700&display=swap';
+		$keyrune = 'https://cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.min.css';
+		$mana    = 'https://cdn.jsdelivr.net/npm/mana-font@latest/css/mana.min.css';
+
 		echo "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n";
 		echo "<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n";
-		echo "<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@1,700&display=swap\">\n";
-		// Keyrune — webfont oficial de símbolos de set MTG (MIT). Ver decision log §11.
-		echo "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.min.css\">\n";
-		// Mana-font — webfont compañero de Keyrune para símbolos de mana (MIT).
-		echo "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/mana-font@latest/css/mana.min.css\">\n";
+		echo "<link rel=\"preconnect\" href=\"https://cdn.jsdelivr.net\" crossorigin>\n";
+
+		// Carga no-bloqueante: preload→onload swap a stylesheet, con noscript de respaldo.
+		// Baja TTFB de render. `display=swap` ya evita FOIT.
+		printf(
+			'<link rel="preload" as="style" href="%1$s" onload="this.rel=\'stylesheet\'">' . "\n"
+			. '<noscript><link rel="stylesheet" href="%1$s"></noscript>' . "\n",
+			esc_url( $fonts )
+		);
+		printf(
+			'<link rel="preload" as="style" href="%1$s" onload="this.rel=\'stylesheet\'">' . "\n"
+			. '<noscript><link rel="stylesheet" href="%1$s"></noscript>' . "\n",
+			esc_url( $keyrune )
+		);
+		printf(
+			'<link rel="preload" as="style" href="%1$s" onload="this.rel=\'stylesheet\'">' . "\n"
+			. '<noscript><link rel="stylesheet" href="%1$s"></noscript>' . "\n",
+			esc_url( $mana )
+		);
+
+		// Preload de la imagen principal del PDP (LCP candidate en ficha).
+		if ( function_exists( 'is_product' ) && is_product() ) {
+			$pid = get_queried_object_id();
+			if ( $pid && has_post_thumbnail( $pid ) ) {
+				$src = wp_get_attachment_image_src( get_post_thumbnail_id( $pid ), 'full' );
+				if ( is_array( $src ) && ! empty( $src[0] ) ) {
+					printf( '<link rel="preload" as="image" href="%s" fetchpriority="high">' . "\n", esc_url( $src[0] ) );
+				}
+			}
+		}
 	},
 	1
+);
+
+/**
+ * Defer del main.js (hoy está en footer, pero defer permite al parser seguir
+ * ejecutando y respetar orden de ejecución si más scripts se suman después).
+ */
+add_filter(
+	'script_loader_tag',
+	function ( $tag, $handle ) {
+		if ( 'onplay-main' !== $handle ) {
+			return $tag;
+		}
+		if ( false !== strpos( $tag, ' defer' ) ) {
+			return $tag;
+		}
+		return str_replace( ' src=', ' defer src=', $tag );
+	},
+	10,
+	2
 );

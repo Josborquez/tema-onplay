@@ -11,11 +11,15 @@
 
 	&__grid {
 		display: grid;
-		grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr;
-		gap: var(--space-12);
+		grid-template-columns: 1.6fr repeat(5, 1fr);
+		gap: var(--space-10);
 		margin-bottom: var(--space-12);
 
-		@media (max-width: 960px) {
+		@media (max-width: 1200px) {
+			grid-template-columns: 1fr 1fr 1fr;
+		}
+
+		@media (max-width: 720px) {
 			grid-template-columns: 1fr 1fr;
 		}
 
@@ -93,6 +97,9 @@
 			display: flex;
 			flex-direction: column;
 			gap: 10px;
+			list-style: none;
+			padding: 0;
+			margin: 0;
 		}
 
 		li,
@@ -100,10 +107,20 @@
 			font-size: 13px;
 			color: var(--mid-2);
 			transition: color var(--t-fast);
+		}
 
-			&:hover {
+		a {
+			text-decoration: none;
+
+			&:hover,
+			&:focus-visible {
 				color: var(--bone);
 			}
+		}
+
+		.is-muted {
+			color: var(--mid);
+			opacity: 0.72;
 		}
 	}
 
