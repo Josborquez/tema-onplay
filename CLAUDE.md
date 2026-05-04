@@ -817,8 +817,15 @@ fcb2a7d docs(status+claude): registrar M-OP-filtros y traer sistema status
 
 ### Commits del módulo
 
+Rama `feat/m-op-buscador` (local, no pushed; basada en `feat/m-op-filtros`):
+
 ```
-(pendiente de crear — rama feat/m-op-buscador)
+67adb9e build(search): rebuild dist bundle
+77cc672 feat(search-js): rama tcg=op + render diferenciado + empty state CTA
+892458e style(search): indicador OP, badge alt-art, empty state con CTA
+fee5db8 feat(header): detección de contexto OP + indicador visual
+44ee4e1 feat(search): rama tcg=op en endpoint con tax JOIN y agrupación por card_number
+b219957 feat(search): helpers de contexto OP (is_single + in_op_context + tt_ids)
 ```
 
 ---
