@@ -1,0 +1,177 @@
+// M-OP-filtros — Sidebar de filtros para One Piece TCG.
+// Reusa la estructura `.shop-sidebar / .filter-group` definida en `_filters.scss`;
+// aquí solo agregamos los componentes específicos OP (swatches, pills) y el
+// comportamiento mobile del wrapper. Diseño de referencia:
+// docs/design-onplay-cl/project/listing-onepiece.jsx
+
+// Wrapper específico — mismas reglas sticky/scroll que .shop-sidebar.
+.shop-sidebar--op {
+	// Hereda position:sticky, max-height, scrollbars de `.shop-sidebar`.
+}
+
+// ── Grid de opciones ────────────────────────────────────
+.op-filters__grid {
+	display: grid;
+	gap: var(--space-1);
+}
+
+.op-filters__grid--cols-2 {
+	grid-template-columns: 1fr 1fr;
+}
+
+.op-filters__grid--cols-3 {
+	grid-template-columns: repeat(3, 1fr);
+}
+
+// ── Opción Color (con swatch + label) ───────────────────
+.op-filters__option {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	padding: 6px 8px;
+	border: 1px solid var(--line-2);
+	background: transparent;
+	color: var(--bone);
+	font-family: var(--body);
+	font-size: 11px;
+	border-radius: var(--radius-xs);
+	cursor: pointer;
+	transition: border-color var(--t-fast), background var(--t-fast);
+	text-align: left;
+
+	&:hover {
+		border-color: var(--bone-2);
+	}
+
+	&.is-active,
+	&[aria-pressed="true"] {
+		border-color: var(--carmesi);
+		background: rgba(214, 40, 40, 0.1);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--carmesi);
+		outline-offset: 1px;
+	}
+}
+
+.op-filters__swatch {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	border: 1px solid transparent;
+	font-family: var(--mono);
+	font-size: 10px;
+	font-weight: 700;
+	flex-shrink: 0;
+	line-height: 1;
+}
+
+.op-filters__label {
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+// ── Pill (Card Type, Illustration Type) ─────────────────
+.op-filters__pill {
+	padding: 8px;
+	font-family: var(--mono);
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	border: 1px solid var(--line-2);
+	background: transparent;
+	color: var(--mid-2);
+	border-radius: var(--radius-xs);
+	cursor: pointer;
+	transition: border-color var(--t-fast), background var(--t-fast), color var(--t-fast);
+
+	&:hover {
+		color: var(--bone);
+		border-color: var(--bone-2);
+	}
+
+	&.is-active,
+	&[aria-pressed="true"] {
+		border-color: var(--carmesi);
+		background: rgba(214, 40, 40, 0.1);
+		color: var(--bone);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--carmesi);
+		outline-offset: 1px;
+	}
+}
+
+// ── Mobile: panel colapsable bajo botón "Filtros (N)" ───
+// CA-8: viewport ≤768px, panel colapsado bajo botón con contador.
+// El JS (op-filters extension de Filters) inserta el botón y togglea
+// `[data-mobile-open]` en el aside.
+@media (max-width: 768px) {
+	.op-filters-mobile-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		padding: 10px 14px;
+		margin-bottom: var(--space-3);
+		background: var(--carbon);
+		border: 1px solid var(--line-2);
+		border-radius: var(--radius-xs);
+		color: var(--bone);
+		font-family: var(--display);
+		font-size: 13px;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		cursor: pointer;
+
+		&:hover {
+			border-color: var(--bone-2);
+		}
+
+		&__count {
+			color: var(--carmesi);
+			font-family: var(--mono);
+			font-size: 12px;
+			margin-left: var(--space-2);
+
+			&:empty {
+				display: none;
+			}
+		}
+
+		&__chev {
+			color: var(--mid);
+			font-size: 10px;
+			transition: transform var(--t-fast);
+		}
+
+		&[aria-expanded="false"] .op-filters-mobile-toggle__chev {
+			transform: rotate(-90deg);
+		}
+	}
+
+	.shop-sidebar--op[data-mobile-open="false"] {
+		display: none;
+	}
+
+	.shop-sidebar--op {
+		position: static;
+		max-height: none;
+		overflow: visible;
+	}
+}
+
+// Desktop: ocultar el toggle mobile.
+@media (min-width: 769px) {
+	.op-filters-mobile-toggle {
+		display: none;
+	}
+}
