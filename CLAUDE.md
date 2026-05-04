@@ -733,6 +733,46 @@ Previo al switch de tema decidimos skinear My Account porque sin overrides WC si
 
 ---
 
+## 11.d. M-OP-filtros — Panel facetado One Piece TCG (2026-05-03)
+
+### Hecho
+
+- **`inc/op-filters.php`** + **`inc/op-filters/{query,panel,enqueue}.php`** — bootstrap, helpers de detección de archive OP, render del sidebar, body_class condicional `onplay-op-archive`.
+- **`template-parts/op-filters/group-{color,card-type,illustration}.php`** — 3 grupos con SSR de `aria-pressed`/`is-active` desde URL.
+- **`assets/src/scss/components/_op-filters.scss`** — swatches (R/G/B/P/K/Y), pills mono uppercase, mobile collapse con contador.
+- **`assets/src/js/op-filters.js`** — extensión del módulo `Filters` existente con monkey-patch sobre `defaultState`/`readStateFromURL`/`writeStateToURL`/`applyStateToUI`/`buildQuery` + click handler para botones aria-pressed + mobile toggle.
+- **Modificaciones puntuales**: `template-parts/filters-sidebar.php` (4 líneas, fork temprano si archive OP), `inc/filters-ajax.php` (2 hooks de extensión), `package.json` (build:js concat), `functions.php` (1 require_once), `README.md` del tema.
+- **Docs**: `docs/specs/M-OP-filtros/` (spec/plan/tasks con bitácora completa), `docs/op-filters-sql-indexes.md`, `docs/design-onplay-cl/` (bundle Claude Design integrado).
+
+### Decisiones clave
+
+1. **Aproximación A — extensión, no duplicación.** El plan original asumía `pre_get_posts` sobre la main query del archive. Realidad: `inc/woocommerce.php` redirecciona `/product-category/<slug>/` → `/shop/?set=<slug>` (302), y `archive-product.php` usa `onplay_filters_run()` con su propio `WP_Query` que ignora `pre_get_posts`. **Decisión aprobada por el dueño**: extender `inc/filters-ajax.php` mediante `apply_filters('onplay_filters_state_after_parse')` y `apply_filters('onplay_filters_meta_query')`. Sin endpoint AJAX paralelo, sin pipeline duplicado. Mantengo `pre_get_posts` como red defensiva para canonical/schemas.
+2. **Sin custom taxonomies para OP.** Decisión heredada de §3.7. Operamos vía `meta_query` con `_color LIKE` (duales como `Red/Purple`), `_card_type IN`, `_is_alt_art =`. Mitigación: índices SQL recomendados en `docs/op-filters-sql-indexes.md`.
+3. **Diseño Claude Design integrado.** El bundle `zB3RicDLFnMe55CrqwI51w` (`Onplay.html` + `listing-onepiece.jsx`) llegó durante la implementación. Se incorporaron los visuales del panel (swatches con letras R/G/B/P/K/Y, pills uppercase mono, grid 2-col, borde carmesí en activo). Se omitieron filtros del diseño que no tienen meta backing en el Binder OP (`_attribute`, `_cost`, `_power`, `_counter`, `_block_icon`, condición/idioma — todo OP es NM/EN). Reincorporables en iteración futura si el Binder los popule.
+4. **Bundle JS via concat.** El `build:js` original era `copyFileSync` puro. Cambio mínimo en `package.json`: lee `main.js` + `op-filters.js` y los concatena al `dist/main.js`. Sin runtime ES modules en el navegador. Si en el futuro se introduce un bundler real, op-filters.js se vuelve un module `import`.
+5. **Junction Laragon documentado.** El docroot `C:\laragon\www\testmanager\wp-content\themes\onplay` es un **junction** al repo en OneDrive. NO hay drift — la memoria `dev_env_laragon.md` describía un escenario antiguo de copia manual.
+
+### Verificación server-side cubierta
+
+- Counts: 25 sin filtro / 15 Red (con duales) / 5 Purple (con duales) / 7 LEADER / 6 alt-art / 5 combinado / Magic 226 sin afectación.
+- SSR `aria-pressed`/`is-active` desde URL (CA-5).
+- `body_class` condicional (T014).
+- No-regresión Magic (T042 server-side): sidebar Magic intacto, sin op_* injustificados.
+
+### Pendiente owner (verificación visual + Lighthouse)
+
+- Smoke en navegador: panel desktop, panel mobile colapsado con contador, grid filtrado, URL compartida entre browsers, back/forward del navegador.
+- Lighthouse mobile en `/shop/?set=one-piece-tcg` (target ≥ 80, no degradar más de 5 pts vs baseline).
+- Capturas en `docs/specs/M-OP-filtros/qa/`.
+
+### Commits del módulo
+
+```
+(pendiente de crear — rama feat/m-op-filtros)
+```
+
+---
+
 ## 12. Cómo interactuar con Claude Code en este proyecto
 
 - Empezar cada sesión: "estoy trabajando en el módulo X". Claude Code lee este CLAUDE.md primero.
