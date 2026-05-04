@@ -30,4 +30,5 @@ require_once ONPLAY_THEME_DIR . '/inc/checkout-rut.php';
 require_once ONPLAY_THEME_DIR . '/inc/search.php';
 require_once ONPLAY_THEME_DIR . '/inc/listing-grouping.php';
 require_once ONPLAY_THEME_DIR . '/inc/filters-ajax.php';
+require_once ONPLAY_THEME_DIR . '/inc/op-filters.php';
 require_once ONPLAY_THEME_DIR . '/inc/home.php';

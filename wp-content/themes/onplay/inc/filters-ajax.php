@@ -69,6 +69,13 @@ function onplay_filters_parse_request( $src ) {
 		$state['sort'] = 'price-desc';
 	}
 
+	/**
+	 * Permite a módulos add-on (M-OP-filtros) inyectar claves de estado
+	 * adicionales después del parseo del request. El receptor recibe el state
+	 * tipado y la fuente original.
+	 */
+	$state = apply_filters( 'onplay_filters_state_after_parse', $state, $src );
+
 	return $state;
 }
 
@@ -193,6 +200,12 @@ function onplay_filters_query_ids( $state ) {
 			'compare' => 'BETWEEN',
 		);
 	}
+
+	/**
+	 * Permite a módulos add-on (M-OP-filtros) agregar clausulas al meta_query
+	 * antes de la WP_Query. El receptor recibe el meta_query parcial y el state.
+	 */
+	$meta_query = apply_filters( 'onplay_filters_meta_query', $meta_query, $state );
 
 	if ( count( $meta_query ) > 1 ) {
 		$args['meta_query'] = $meta_query;
