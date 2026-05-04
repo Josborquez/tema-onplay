@@ -26,7 +26,7 @@
 			<div class="site-header__announce-links">
 				<span><?php esc_html_e( 'Despacho Chile vía Chilexpress', 'onplay' ); ?></span>
 				<a href="<?php echo esc_url( home_url( '/ayuda/' ) ); ?>"><?php esc_html_e( 'Ayuda', 'onplay' ); ?></a>
-				<a class="is-strong" href="<?php echo esc_url( home_url( '/mi-cuenta/' ) ); ?>"><?php esc_html_e( 'Mi cuenta', 'onplay' ); ?></a>
+				<a class="is-strong" href="<?php echo esc_url( ( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/mi-cuenta/' ) ) ); ?>"><?php esc_html_e( 'Mi cuenta', 'onplay' ); ?></a>
 			</div>
 		</div>
 	</div>
@@ -186,7 +186,7 @@
 			</nav>
 
 			<div class="site-header__actions">
-				<a class="btn btn-ghost" href="<?php echo esc_url( home_url( '/mi-cuenta/' ) ); ?>" aria-label="<?php esc_attr_e( 'Mi cuenta', 'onplay' ); ?>">
+				<a class="btn btn-ghost" href="<?php echo esc_url( ( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/mi-cuenta/' ) ) ); ?>" aria-label="<?php esc_attr_e( 'Mi cuenta', 'onplay' ); ?>">
 					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 						<circle cx="12" cy="8" r="4"/>
 						<path d="M4 21v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2"/>

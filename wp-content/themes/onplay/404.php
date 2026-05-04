@@ -8,7 +8,7 @@
 get_header();
 
 $shop_url    = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/tienda/' );
-$account_url = home_url( '/mi-cuenta/' );
+$account_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/mi-cuenta/' );
 ?>
 
 <main id="primary" class="static-page static-page--404 screen-enter" role="main">

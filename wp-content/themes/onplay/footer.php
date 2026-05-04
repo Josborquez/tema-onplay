@@ -8,7 +8,7 @@
 // Helpers definidos en inc/pages.php. Si la página no existe, renderizamos el
 // item como <span> inerte para no ensuciar el UI con links rotos.
 $onplay_shop_url    = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/tienda/' );
-$onplay_account_url = home_url( '/mi-cuenta/' );
+$onplay_account_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/mi-cuenta/' );
 
 /**
  * Renderiza un <li> del footer. Si la página existe → link; si no → span.
@@ -61,7 +61,14 @@ if ( ! function_exists( 'onplay_footer_link' ) ) {
 				<div class="site-footer__col-title"><?php esc_html_e( 'Juegos', 'onplay' ); ?></div>
 				<ul>
 					<li><a href="<?php echo esc_url( $onplay_shop_url ); ?>"><?php esc_html_e( 'Magic: The Gathering', 'onplay' ); ?></a></li>
-					<li><span class="is-muted"><?php esc_html_e( 'One Piece · Pronto', 'onplay' ); ?></span></li>
+					<?php
+					$onplay_op_term = get_term_by( 'slug', 'one-piece-tcg', 'product_cat' );
+					$onplay_op_url  = ( $onplay_op_term && ! is_wp_error( $onplay_op_term ) ) ? get_term_link( $onplay_op_term ) : '';
+					if ( $onplay_op_url && ! is_wp_error( $onplay_op_url ) ) : ?>
+						<li><a href="<?php echo esc_url( $onplay_op_url ); ?>"><?php esc_html_e( 'One Piece TCG', 'onplay' ); ?></a></li>
+					<?php else : ?>
+						<li><span class="is-muted"><?php esc_html_e( 'One Piece · Pronto', 'onplay' ); ?></span></li>
+					<?php endif; ?>
 					<li><span class="is-muted"><?php esc_html_e( 'Pokémon TCG · Pronto', 'onplay' ); ?></span></li>
 					<li><span class="is-muted"><?php esc_html_e( 'Riftbound · Pronto', 'onplay' ); ?></span></li>
 				</ul>
