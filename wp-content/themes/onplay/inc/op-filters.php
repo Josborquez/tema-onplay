@@ -19,5 +19,6 @@
 defined( 'ABSPATH' ) || exit;
 
 require_once __DIR__ . '/op-filters/query.php';
+require_once __DIR__ . '/op-filters/helpers.php';
 require_once __DIR__ . '/op-filters/panel.php';
 require_once __DIR__ . '/op-filters/enqueue.php';
