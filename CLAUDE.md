@@ -767,8 +767,16 @@ Previo al switch de tema decidimos skinear My Account porque sin overrides WC si
 
 ### Commits del módulo
 
+Rama `feat/m-op-filtros` (local, no pushed):
+
 ```
-(pendiente de crear — rama feat/m-op-filtros)
+fcb2a7d docs(status+claude): registrar M-OP-filtros y traer sistema status
+6a7c3aa docs(op-filters): integrar bundle Claude Design
+656a9ca docs(op-filters): spec + plan + tasks + SQL indexes + README
+2c72dad build(op-filters): rebuild dist bundle
+90b8fc9 style(op-filters): SCSS component + JS extension + bundle concat
+151621c feat(op-filters): sidebar render + template-parts + fork
+24717c1 feat(op-filters): bootstrap module + query hook extension points
 ```
 
 ---
