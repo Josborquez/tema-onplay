@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Onplay.cl · Singles de Magic</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Oswald:wght@400;500;600;700&family=Anton&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script src="data.js?v=5"></script>
+<script src="data-onepiece.js?v=1"></script>
+<script src="data-riftbound.js?v=1"></script>
+<script type="text/babel" src="shared.jsx?v=7"></script>
+<script type="text/babel" src="home.jsx?v=5"></script>
+<script type="text/babel" src="listing.jsx?v=5"></script>
+<script type="text/babel" src="listing-onepiece.jsx?v=2"></script>
+<script type="text/babel" src="listing-riftbound.jsx?v=2"></script>
+<script type="text/babel" src="pdp.jsx?v=5"></script>
+<script type="text/babel" src="pdp-tcg.jsx?v=1"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accentColor": "#B01919",
+  "displayFont": "Bebas Neue",
+  "heroVariant": "hybrid",
+  "grain": true
+}/*EDITMODE-END*/;
+
+function App() {
+  const [route, setRouteState] = useState({ name: "home" });
+  const [cart, setCart] = useState([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [tweaks, setTweaks] = useState(TWEAK_DEFAULTS);
+  const [editMode, setEditMode] = useState(false);
+
+  // Persist route
+  useEffect(() => {
+    const saved = localStorage.getItem("onplay_route");
+    if (saved) {
+      try { setRouteState(JSON.parse(saved)); } catch(e) {}
+    }
+  }, []);
+
+  const setRoute = (r) => {
+    setRouteState(r);
+    localStorage.setItem("onplay_route", JSON.stringify(r));
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+
+  const addToCart = (card, qty = 1) => {
+    setCart(prev => {
+      const key = `${card.name}-${card.set}-${card.condition}-${card.lang}-${card.foil}`;
+      const idx = prev.findIndex(i => i.key === key);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = { ...next[idx], qty: next[idx].qty + qty };
+        return next;
+      }
+      return [...prev, { key, ...card, qty }];
+    });
+    setCartOpen(true);
+    setTimeout(() => setCartOpen(false), 2500);
+  };
+
+  // Apply tweaks to document
+  useEffect(() => {
+    document.documentElement.style.setProperty("--carmesi", tweaks.accentColor);
+    // Compute hover/deep variants
+    const ac = tweaks.accentColor;
+    document.documentElement.style.setProperty("--display", `"${tweaks.displayFont}", "Oswald", sans-serif`);
+    if (tweaks.grain) document.body.classList.remove("no-grain");
+    else document.body.classList.add("no-grain");
+  }, [tweaks]);
+
+  // Tweaks protocol
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.data?.type === "__activate_edit_mode") setEditMode(true);
+      if (e.data?.type === "__deactivate_edit_mode") setEditMode(false);
+    };
+    window.addEventListener("message", handler);
+    window.parent.postMessage({ type: "__edit_mode_available" }, "*");
+    return () => window.removeEventListener("message", handler);
+  }, []);
+
+  const updateTweak = (key, value) => {
+    const next = { ...tweaks, [key]: value };
+    setTweaks(next);
+    window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { [key]: value } }, "*");
+  };
+
+  const cartCount = cart.reduce((s, i) => s + i.qty, 0);
+  const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+  return (
+    <div data-screen-label={
+      route.name === "home" ? "01 Home" :
+      route.name === "listing" ? "02 Listing MTG" :
+      route.name === "listing-op" ? "04 Listing One Piece" :
+      route.name === "listing-rb" ? "05 Listing Riftbound" :
+      route.name === "pdp-op" ? "06 PDP One Piece" :
+      route.name === "pdp-rb" ? "07 PDP Riftbound" :
+      "03 PDP Magic"
+    }>
+      <Header route={route} setRoute={setRoute} cartCount={cartCount} />
+      {route.name === "home" && <Home setRoute={setRoute} addToCart={addToCart} heroVariant={tweaks.heroVariant} />}
+      {route.name === "listing" && <Listing setRoute={setRoute} addToCart={addToCart} initialQuery={route.query} initialSet={route.setFilter} />}
+      {route.name === "listing-op" && <OPListing setRoute={setRoute} addToCart={addToCart} />}
+      {route.name === "listing-rb" && <RBListing setRoute={setRoute} addToCart={addToCart} />}
+      {route.name === "pdp" && <PDP card={route.card} setRoute={setRoute} addToCart={addToCart} />}
+      {route.name === "pdp-op" && <OPPDP card={route.card} setRoute={setRoute} addToCart={addToCart} />}
+      {route.name === "pdp-rb" && <RBPDP card={route.card} setRoute={setRoute} addToCart={addToCart} />}
+      <Footer />
+
+      {/* Cart drawer */}
+      {cartOpen && (
+        <div style={{ position: "fixed", top: 100, right: 20, width: 380, maxHeight: "calc(100vh - 120px)", background: "var(--carbon)", border: "1px solid var(--line-2)", borderRadius: 3, boxShadow: "0 24px 60px rgba(0,0,0,0.8)", zIndex: 200, overflow: "hidden", animation: "slideIn 200ms ease" }}>
+          <div style={{ padding: "14px 18px", borderBottom: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--carbon-2)" }}>
+            <div className="d-md" style={{ fontSize: 18 }}>Tu carrito · {cartCount}</div>
+            <span onClick={() => setCartOpen(false)} style={{ cursor: "pointer", color: "var(--mid-2)", fontSize: 18 }}>×</span>
+          </div>
+          <div style={{ maxHeight: 360, overflowY: "auto" }}>
+            {cart.length === 0 && <div style={{ padding: 32, textAlign: "center", color: "var(--mid-2)" }}>Tu carrito está vacío</div>}
+            {cart.map((item, i) => (
+              <div key={i} style={{ display: "flex", gap: 10, padding: "12px 16px", borderBottom: "1px solid var(--line)" }}>
+                <img src={item.img} style={{ width: 44, height: 62, objectFit: "cover", borderRadius: 2 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.name}</div>
+                  <div style={{ fontSize: 11, color: "var(--mid-2)", marginTop: 2 }}>{item.set} · {item.condition} · {item.lang}{item.foil ? " · FOIL" : ""}</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 6 }}>
+                    <span className="mono" style={{ fontSize: 11, color: "var(--mid-2)" }}>× {item.qty}</span>
+                    <span className="d-sm" style={{ color: "var(--carmesi)" }}>{formatCLP(item.price * item.qty)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {cart.length > 0 && (
+            <div style={{ padding: 16, background: "var(--carbon-2)", borderTop: "1px solid var(--line)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+                <span style={{ color: "var(--mid-2)", fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase" }}>Subtotal</span>
+                <span className="d-md" style={{ color: "var(--carmesi)" }}>{formatCLP(cartTotal)}</span>
+              </div>
+              <button className="btn btn-primary" style={{ width: "100%" }}>Ir al checkout →</button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tweaks panel */}
+      {editMode && <TweaksPanel tweaks={tweaks} onChange={updateTweak} />}
+      
+      <style>{`
+        @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+      `}</style>
+    </div>
+  );
+}
+
+function TweaksPanel({ tweaks, onChange }) {
+  return (
+    <div style={{ position: "fixed", bottom: 20, right: 20, width: 300, background: "var(--carbon)", border: "1px solid var(--line-2)", borderRadius: 4, boxShadow: "0 16px 50px rgba(0,0,0,0.8)", zIndex: 1000, overflow: "hidden" }}>
+      <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--line)", background: "var(--carbon-2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="d-md" style={{ fontSize: 16 }}>Tweaks</div>
+        <span className="mono" style={{ fontSize: 10, color: "var(--mid-2)", letterSpacing: "0.1em" }}>v1</span>
+      </div>
+      <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Accent color */}
+        <div>
+          <div style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--mid-2)", marginBottom: 8 }}>Color de acento</div>
+          <div style={{ display: "flex", gap: 6 }}>
+            {[
+              ["#D62828", "Carmesí"],
+              ["#B01919", "Rojo profundo"],
+              ["#E8842B", "Ámbar"],
+              ["#E8B04B", "Dorado"],
+              ["#8FA86E", "Verde musgo"]
+            ].map(([c, l]) => (
+              <div key={c} onClick={() => onChange("accentColor", c)}
+                title={l}
+                style={{ width: 32, height: 32, background: c, borderRadius: 2, cursor: "pointer", border: tweaks.accentColor === c ? "2px solid white" : "2px solid transparent" }} />
+            ))}
+          </div>
+        </div>
+
+        {/* Display font */}
+        <div>
+          <div style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--mid-2)", marginBottom: 8 }}>Tipografía display</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+            {["Bebas Neue", "Oswald", "Anton", "Playfair Display"].map(f => (
+              <button key={f} onClick={() => onChange("displayFont", f)}
+                style={{ padding: "8px", fontFamily: `"${f}"`, fontSize: f === "Playfair Display" ? 14 : 16, textTransform: f === "Playfair Display" ? "none" : "uppercase", fontWeight: f === "Playfair Display" ? 700 : 400, background: tweaks.displayFont === f ? "var(--carmesi)" : "var(--carbon-2)", color: tweaks.displayFont === f ? "white" : "var(--bone-2)", border: "1px solid var(--line-2)", borderRadius: 2, cursor: "pointer" }}>{f.split(" ")[0]}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Hero variant */}
+        <div>
+          <div style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--mid-2)", marginBottom: 8 }}>Variante de hero</div>
+          <div style={{ display: "flex", gap: 6 }}>
+            {[["hybrid","Hybrid"],["catalog","Catálogo"],["search","Búsqueda"]].map(([v, l]) => (
+              <button key={v} onClick={() => onChange("heroVariant", v)}
+                style={{ flex: 1, padding: "8px", fontSize: 11, background: tweaks.heroVariant === v ? "var(--carmesi)" : "var(--carbon-2)", color: tweaks.heroVariant === v ? "white" : "var(--bone-2)", border: "1px solid var(--line-2)", borderRadius: 2, cursor: "pointer" }}>{l}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Grain */}
+        <div>
+          <div style={{ fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--mid-2)", marginBottom: 8 }}>Grano / textura</div>
+          <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 13 }}>
+            <div onClick={() => onChange("grain", !tweaks.grain)} style={{ position: "relative", width: 36, height: 20, background: tweaks.grain ? "var(--carmesi)" : "var(--carbon-3)", borderRadius: 10, transition: "background 120ms" }}>
+              <div style={{ position: "absolute", top: 2, left: tweaks.grain ? 18 : 2, width: 16, height: 16, background: "white", borderRadius: "50%", transition: "left 120ms" }} />
+            </div>
+            <span style={{ color: "var(--bone-2)" }}>{tweaks.grain ? "Activado" : "Desactivado"}</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
