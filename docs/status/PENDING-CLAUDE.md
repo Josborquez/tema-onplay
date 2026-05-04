@@ -113,7 +113,7 @@ Este bloque aplica a las **6 páginas legales** previstas — el template se con
 
 - [ ] **Skip Scryfall enrichment para SKUs OP-** en `inc/scryfall-enrich.php` (5 líneas: guard `if onplay_tcg_from_sku($sku) === 'op' return early`).
 - [ ] **Ficha de producto OP** — mostrar `_color`, `_card_type`, `_card_number`, `_rarity`, alt-art badge si `_is_alt_art = yes`. Iconografía oficial pendiente de coordinar (¿qué fuente para los 6 colores?).
-- [ ] **Endpoint AJAX de búsqueda OP-only** (M-OP-buscador) — variante de `inc/search.php` que filtra `product_cat=one-piece-tcg` para el header search cuando se está navegando dentro de One Piece.
+- ✅ **Endpoint AJAX de búsqueda OP-only** (M-OP-buscador) — implementado 2026-05-04 vía rama `tcg=op` en `inc/search.php` + detección de contexto en header. Ver DONE.md.
 - [ ] **Si el Binder popula `_block_icon`**: reincorporar el filtro de Block Icon a M-OP-filtros (constante adicional + 1 grupo en `template-parts/op-filters/`, mismo patrón que los otros 3).
 
 **Diferencia con M2 Magic:** Magic registra taxonomías (`tcg_color`, `tcg_rarity`, etc.) por performance a escala. OP queda con `meta_query` por consistencia con el contrato del Binder OP. CLAUDE.md §3.7 advirtió la degradación; aquí se acepta la deuda. Índices SQL recomendados en `docs/op-filters-sql-indexes.md` (aplicar cuando el catálogo OP supere ~500 productos).

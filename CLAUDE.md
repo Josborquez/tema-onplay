@@ -781,6 +781,48 @@ fcb2a7d docs(status+claude): registrar M-OP-filtros y traer sistema status
 
 ---
 
+## 11.e. M-OP-buscador — Buscador AJAX contextual One Piece (2026-05-04)
+
+### Hecho
+
+- **`inc/op-filters/helpers.php`** (nuevo) — `onplay_op_is_single()` (detecta single product cuyo `product_cat` desciende de `one-piece-tcg`), `onplay_op_in_op_context()` (combina archive + single), `onplay_op_get_descendant_tt_ids()` (cache static de los 10 term_taxonomy_ids OP).
+- **`inc/search.php`** — handler ramificado por `?tcg=op`. Nueva función `onplay_search_products_op($q, $limit)` con SQL crudo: `INNER JOIN wp_term_relationships` + búsqueda LIKE en `post_title`/`_sku`/`_card_number`, agrupación por `_card_number` con regla "regular gana sobre alt-art como representante". Magic preserva comportamiento M5 intacto (solo se agrega `context: "global"|"op"` al payload).
+- **`header.php`** — `onplay_op_in_op_context()` decide si agregar `data-tcg="op"`, hidden inputs (`set=one-piece-tcg` + `tcg=op`), span `[data-onplay-search-context]` "Buscando en One Piece", modifier `--op`. Form action condicional (`/shop/?set=one-piece-tcg` cuando OP, `/shop/` cuando global).
+- **`inc/enqueue.php`** — i18n strings nuevos (`opNoResults`, `opSearchAll`, `opAltArt`).
+- **`assets/src/js/op-search.js`** (nuevo) + **`package.json`** — monkey-patch sobre `Search.fetch`/`Search.render`. Agrega `&tcg=op` al fetch cuando `data-tcg`. Render diferenciado: items OP con set_code (`OP15-EB04`) + badge "Alt Art"; empty state OP con CTA "Buscar en todo el sitio" que dispara `doGlobalRefetch()` sin `tcg=op`. Concatenado al bundle via `build:js` extendido.
+- **`_search-autocomplete.scss`** — indicador absolute en `var(--carmesi)`/mono/uppercase, borde input tenue en contexto, badge alt-art en gold, empty state con CTA.
+
+### Decisiones clave
+
+1. **Aproximación A — extensión, no duplicación.** El plan asumía endpoint REST y `WP_Query`/template-parts paralelos. Realidad: M5 es admin-ajax con SQL crudo. Se extiende ese endpoint con rama `tcg=op` y la JS hace monkey-patch del módulo `Search` existente. NO se crea endpoint paralelo, NO se duplica SQL, NO se crean archivos de template/JS distintos al patrón `op-*` ya consolidado en M-OP-filtros.
+2. **Agrupación OP por `_card_number`, no por `print_key`.** `print_key` es un concepto Magic (set+collector). En OP, el card_number es la identidad lógica de la carta (variantes alt-art comparten card_number). El payload reusa el campo `print_key` con el valor del card_number para no romper el JS heredado.
+3. **Regla "regular gana sobre alt-art".** Cuando hay 2+ productos con el mismo `_card_number`, el representante del grupo es la versión NO alt-art (si existe). El precio "Desde" sigue mostrando el mínimo de todos los productos del grupo.
+4. **Bundle JS via concat (mismo patrón M-OP-filtros).** `op-search.js` se concatena al `dist/main.js` después de `op-filters.js`. Sin runtime ES modules.
+5. **T023 cache transient — fuera por YAGNI.** Latencia OP paritaria con Magic en local (~950ms P95, env-bound no SQL-bound). Cache invalidation requeriría hook `save_post_product` selectivo, footgun no justificado por mejora marginal medible. Reactivable si Hostinger muestra >500ms.
+6. **Slug del shop = `/shop/`** (descubierto en M-OP-filtros). Submit form va a `/shop/?set=one-piece-tcg` cuando OP, `/shop/` cuando global. NO a `/categoria-producto/...` (esos se redirigen 302 al shop por `inc/woocommerce.php`).
+
+### Verificación cubierta
+
+- 6 escenarios CA via endpoint AJAX real (Bonney, EB04 prefix, Carina agrupado, Bolt empty OP, Bolt Magic global, Burst Magic). Todos ✓.
+- SSR header: `data-tcg`/`--op`/hidden inputs/span correctos en archive OP + single OP; ausentes en home + Magic.
+- No-regresión Magic: payload idéntico estructuralmente, solo se añade campo `context: "global"`.
+- Edge cases: `q=""` y `q="B"` (1 char) devuelven vacío sin error.
+- `debug.log` sin warnings nuevos atribuibles al módulo.
+
+### Pendiente owner (verificación visual)
+
+- Capturas en `docs/specs/M-OP-buscador/qa/`: autocomplete OP con resultados, empty state OP con CTA, autocomplete Magic sin cambios, indicador "Buscando en One Piece" en archive y single OP, submit form OP llegando al shop con set+q.
+- Lighthouse mobile pre/post (CA-6 perf, target ≤3 puntos de degradación).
+- Smoke en mobile ≤768px del indicador.
+
+### Commits del módulo
+
+```
+(pendiente de crear — rama feat/m-op-buscador)
+```
+
+---
+
 ## 12. Cómo interactuar con Claude Code en este proyecto
 
 - Empezar cada sesión: "estoy trabajando en el módulo X". Claude Code lee este CLAUDE.md primero.

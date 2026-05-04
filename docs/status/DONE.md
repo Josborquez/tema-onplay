@@ -189,6 +189,36 @@ Categorías jerárquicas creadas: `One Piece TCG > Booster Packs > [OP15-EB04]` 
 
 ---
 
+## M-OP-buscador — Buscador AJAX contextual One Piece ✅ (código + verificación funcional)
+
+Buscador del header detecta navegación OP (archive descendiente o single product OP) y restringe el autocomplete + submit al universo One Piece. En el resto del sitio (home / archive Magic / single Magic / cuenta / carrito) se mantiene el comportamiento M5 idéntico.
+
+**Archivos**:
+- `inc/op-filters/helpers.php` (nuevo) — `onplay_op_is_single()`, `onplay_op_in_op_context()`, `onplay_op_get_descendant_tt_ids()`.
+- `inc/op-filters.php` — `require_once` del helpers.
+- `inc/search.php` — handler ramificado por `tcg=op` + nueva función `onplay_search_products_op()` con `INNER JOIN wp_term_relationships`, búsqueda en `post_title`/`_sku`/`_card_number`, agrupación por `_card_number` con regla "regular gana sobre alt-art".
+- `inc/enqueue.php` — i18n (`opNoResults`, `opSearchAll`, `opAltArt`).
+- `header.php` — detección de contexto, `data-tcg`, hidden inputs (`set` + `tcg`), span `[data-onplay-search-context]`, modifier `--op`, action condicional (`/shop/?set=one-piece-tcg` vs `/shop/`).
+- `assets/src/scss/components/_search-autocomplete.scss` — indicador, badge alt-art, empty state OP.
+- `assets/src/js/op-search.js` (nuevo) — monkey-patch sobre `Search.fetch`/`Search.render`, branches op-results/op-empty/global, CTA "Buscar en todo el sitio" con re-fetch sin `tcg=op`.
+- `package.json` — `build:js` extendido para concatenar `op-search.js`.
+
+**Estrategia (Aproximación A)**: extiende el endpoint M5 con un parámetro `tcg=op` opcional. Sin endpoint paralelo, sin duplicación de SQL. Magic intacto cuando `tcg` no se envía o ≠ `op`.
+
+**Verificación funcional vía endpoint AJAX real (admin-ajax.php?action=onplay_search&nonce=...)**:
+- `?q=Bonney&tcg=op` → 1 (Jewelry Bonney EB04-002) ✓ CA-3
+- `?q=EB04&tcg=op` → 5 cartas del set EB04 (LIKE en card_number) ✓ CA-4
+- `?q=Carina&tcg=op` → 1 OP07-005 con `is_alt_art:false` (regular gana sobre alt) ✓ CA-5
+- `?q=Bolt&tcg=op` → 0 (empty state JS) ✓ CA-7
+- `?q=Bolt` → 2 Magic results, `context:"global"` ✓ CA-9 no-regresión
+- SSR de `data-tcg`/hidden inputs/indicador correcto en archive OP, sub-cat OP, single OP; ausentes en home/Magic ✓ CA-1, CA-2
+
+**Performance**: P95 latencia ~950ms en Laragon local — paritario entre OP y Magic (el INNER JOIN no degrada). Cache transient T023 NO implementado por YAGNI; reactivar si Hostinger muestra >500ms.
+
+**Pendiente owner**: smoke visual en navegador (capturas en `docs/specs/M-OP-buscador/qa/`), Lighthouse mobile, T052 Lighthouse pre/post.
+
+---
+
 ## M-OP-filtros — Panel facetado One Piece TCG ✅ (código + verificación server-side)
 
 Sidebar de filtros propio para `/shop/?set=one-piece-tcg` (y descendientes). Filtra por **Color** con soporte de duales (`Red/Yellow`, `Red/Purple`), **Tipo de carta** (Leader/Character/Event/Stage), **Tipo de ilustración** (Normal/Alternate Art).
