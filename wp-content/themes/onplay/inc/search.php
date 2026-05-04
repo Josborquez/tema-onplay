@@ -34,7 +34,7 @@ function onplay_ajax_search_handler() {
 	$q = trim( $q );
 
 	$tcg = isset( $_GET['tcg'] ) ? sanitize_key( wp_unslash( (string) $_GET['tcg'] ) ) : '';
-	if ( 'op' !== $tcg ) {
+	if ( ! in_array( $tcg, array( 'op', 'mtg' ), true ) ) {
 		$tcg = '';
 	}
 
@@ -49,14 +49,20 @@ function onplay_ajax_search_handler() {
 
 	if ( 'op' === $tcg ) {
 		$results = onplay_search_products_op( $q, ONPLAY_SEARCH_MAX_RESULTS );
+		$ctx     = 'op';
+	} elseif ( 'mtg' === $tcg ) {
+		// Rama simétrica a OP: excluye productos descendientes de one-piece-tcg.
+		$results = onplay_search_products( $q, ONPLAY_SEARCH_MAX_RESULTS, array( 'exclude_op' => true ) );
+		$ctx     = 'mtg';
 	} else {
 		$results = onplay_search_products( $q, ONPLAY_SEARCH_MAX_RESULTS );
+		$ctx     = 'global';
 	}
 
 	wp_send_json_success(
 		array(
 			'results' => $results,
-			'context' => 'op' === $tcg ? 'op' : 'global',
+			'context' => $ctx,
 		)
 	);
 }
@@ -71,17 +77,26 @@ add_action( 'wp_ajax_nopriv_onplay_search', 'onplay_ajax_search_handler' );
  *
  * @param string $q
  * @param int    $limit
+ * @param array  $opts  ['exclude_op' => bool]  Si true, filtra fuera productos
+ *                      descendientes de one-piece-tcg (rama Magic-strict).
  * @return array<int, array{name:string,set_name:string,set_code:string,print_key:string,min_price:float,min_price_formatted:string,thumb:string,permalink:string,context:string}>
  */
-function onplay_search_products( $q, $limit ) {
+function onplay_search_products( $q, $limit, $opts = array() ) {
 	global $wpdb;
 
 	$like  = '%' . $wpdb->esc_like( $q ) . '%';
 	// Traemos un pool amplio (limit * 6) para que la agrupación por print_key
 	// no deje al usuario con 1 resultado cuando hay 40 SKUs del mismo título.
 	$pool  = max( (int) $limit * 6, 48 );
-	$rows  = $wpdb->get_col(
-		$wpdb->prepare(
+
+	// Magic-strict: excluir productos cuyo product_cat sea OP raíz o descendiente.
+	$exclude_op = ! empty( $opts['exclude_op'] ) && function_exists( 'onplay_op_get_descendant_tt_ids' );
+	$op_tt_ids  = $exclude_op ? onplay_op_get_descendant_tt_ids() : array();
+	if ( $exclude_op && ! empty( $op_tt_ids ) ) {
+		$op_in = implode( ',', array_map( 'intval', $op_tt_ids ) );
+		// NOT EXISTS subquery — más eficiente que LEFT JOIN + WHERE NULL para
+		// exclusión cuando hay muchos terms.
+		$sql = $wpdb->prepare(
 			"SELECT DISTINCT p.ID
 			 FROM {$wpdb->posts} p
 			 LEFT JOIN {$wpdb->postmeta} pm_sku ON pm_sku.post_id = p.ID AND pm_sku.meta_key = '_sku'
@@ -90,13 +105,37 @@ function onplay_search_products( $q, $limit ) {
 			   AND p.post_status = 'publish'
 			   AND ( p.post_title LIKE %s OR pm_sku.meta_value LIKE %s )
 			   AND pm_stock.meta_value = 'instock'
+			   AND NOT EXISTS (
+			     SELECT 1 FROM {$wpdb->term_relationships} tr_op
+			     WHERE tr_op.object_id = p.ID
+			       AND tr_op.term_taxonomy_id IN ($op_in)
+			   )
 			 ORDER BY p.post_title ASC
 			 LIMIT %d",
 			$like,
 			$like,
 			$pool
-		)
-	);
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_col( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+	} else {
+		$rows = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT p.ID
+				 FROM {$wpdb->posts} p
+				 LEFT JOIN {$wpdb->postmeta} pm_sku ON pm_sku.post_id = p.ID AND pm_sku.meta_key = '_sku'
+				 LEFT JOIN {$wpdb->postmeta} pm_stock ON pm_stock.post_id = p.ID AND pm_stock.meta_key = '_stock_status'
+				 WHERE p.post_type = 'product'
+				   AND p.post_status = 'publish'
+				   AND ( p.post_title LIKE %s OR pm_sku.meta_value LIKE %s )
+				   AND pm_stock.meta_value = 'instock'
+				 ORDER BY p.post_title ASC
+				 LIMIT %d",
+				$like,
+				$like,
+				$pool
+			)
+		);
+	}
 
 	if ( empty( $rows ) ) {
 		return array();

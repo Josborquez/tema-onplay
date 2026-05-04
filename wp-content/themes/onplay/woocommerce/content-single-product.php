@@ -62,12 +62,28 @@ if ( is_array( $category_terms ) && ! empty( $category_terms ) ) {
 		$set_term_id = $category_terms[0]->term_id;
 	}
 }
+
+// TCG-aware breadcrumb: si el producto desciende de one-piece-tcg el segundo
+// crumb apunta a "One Piece" + /shop/?set=one-piece-tcg; si no, "Magic" +
+// /shop/. Detección reusa onplay_op_term_descends_from() de M-OP-filtros.
+$pdp_is_op = false;
+if ( is_array( $category_terms ) ) {
+	foreach ( $category_terms as $t ) {
+		if ( function_exists( 'onplay_op_term_descends_from' ) && onplay_op_term_descends_from( $t, 'one-piece-tcg' ) ) {
+			$pdp_is_op = true;
+			break;
+		}
+	}
+}
+$pdp_shop_url   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/tienda/' );
+$pdp_tcg_label  = $pdp_is_op ? __( 'One Piece', 'onplay' ) : __( 'Magic', 'onplay' );
+$pdp_tcg_url    = $pdp_is_op ? add_query_arg( 'set', 'one-piece-tcg', $pdp_shop_url ) : $pdp_shop_url;
 ?>
 <div class="pdp-breadcrumb">
 	<div class="container">
 		<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Inicio', 'onplay' ); ?></a>
 		<span class="sep">/</span>
-		<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>"><?php esc_html_e( 'Magic', 'onplay' ); ?></a>
+		<a href="<?php echo esc_url( $pdp_tcg_url ); ?>"><?php echo esc_html( $pdp_tcg_label ); ?></a>
 		<?php if ( $set_name && $set_term_id ) : ?>
 			<span class="sep">/</span>
 			<a href="<?php echo esc_url( get_term_link( $set_term_id, 'product_cat' ) ); ?>"><?php echo esc_html( $set_name ); ?></a>

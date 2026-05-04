@@ -100,11 +100,13 @@ function onplay_seo_archive_breadcrumb_schema() {
 
 	$shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/tienda/' );
 
+	// TCG-aware: el 2º crumb refleja "One Piece" o "Magic" según contexto.
+	$is_op = function_exists( 'onplay_op_is_archive' ) && onplay_op_is_archive();
 	$items[] = array(
 		'@type'    => 'ListItem',
 		'position' => 2,
-		'name'     => __( 'Magic', 'onplay' ),
-		'item'     => $shop_url,
+		'name'     => $is_op ? __( 'One Piece', 'onplay' ) : __( 'Magic', 'onplay' ),
+		'item'     => $is_op ? add_query_arg( 'set', 'one-piece-tcg', $shop_url ) : $shop_url,
 	);
 
 	if ( is_tax( 'product_cat' ) ) {
@@ -132,6 +134,18 @@ function onplay_seo_archive_breadcrumb_schema() {
 function onplay_seo_single_breadcrumb_schema( $product ) {
 	$shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/tienda/' );
 
+	// TCG-aware: detectar si el producto es OP (descendiente de one-piece-tcg).
+	$is_op    = false;
+	$cats     = get_the_terms( $product->get_id(), 'product_cat' );
+	if ( is_array( $cats ) ) {
+		foreach ( $cats as $t ) {
+			if ( function_exists( 'onplay_op_term_descends_from' ) && onplay_op_term_descends_from( $t, 'one-piece-tcg' ) ) {
+				$is_op = true;
+				break;
+			}
+		}
+	}
+
 	$items = array(
 		array(
 			'@type'    => 'ListItem',
@@ -142,13 +156,12 @@ function onplay_seo_single_breadcrumb_schema( $product ) {
 		array(
 			'@type'    => 'ListItem',
 			'position' => 2,
-			'name'     => __( 'Magic', 'onplay' ),
-			'item'     => $shop_url,
+			'name'     => $is_op ? __( 'One Piece', 'onplay' ) : __( 'Magic', 'onplay' ),
+			'item'     => $is_op ? add_query_arg( 'set', 'one-piece-tcg', $shop_url ) : $shop_url,
 		),
 	);
 
 	$set_term = null;
-	$cats     = get_the_terms( $product->get_id(), 'product_cat' );
 	if ( is_array( $cats ) ) {
 		foreach ( $cats as $t ) {
 			if ( $t->parent > 0 ) {

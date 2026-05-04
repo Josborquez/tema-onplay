@@ -53,16 +53,21 @@
 				$onplay_search_q = sanitize_text_field( wp_unslash( $_GET['q'] ) );
 			}
 
-			// M-OP-buscador: si el usuario está navegando OP (archive descendiente
-			// o single product OP), restringimos el buscador a ese universo.
-			$onplay_op_ctx = function_exists( 'onplay_op_in_op_context' ) && onplay_op_in_op_context();
+			// M-OP-buscador: detección de contexto del buscador.
+			// - OP: archive descendiente de one-piece-tcg, single OP.
+			// - MTG: archive Magic, single Magic, shop sin set=op.
+			// - GLOBAL: home (busca en todo, comportamiento M5 puro).
+			$onplay_op_ctx  = function_exists( 'onplay_op_in_op_context' ) && onplay_op_in_op_context();
+			$onplay_mtg_ctx = ! $onplay_op_ctx && function_exists( 'onplay_op_is_magic_context' ) && onplay_op_is_magic_context();
 			if ( $onplay_op_ctx ) {
-				// Submit form va al shop con set=one-piece-tcg para mantener el
-				// contexto al aterrizar en el listado (archive-product.php parsea
-				// el param `q` para búsqueda libre).
 				$onplay_search_action = add_query_arg( 'set', 'one-piece-tcg', $onplay_shop_url );
+				$onplay_search_tcg    = 'op';
+			} elseif ( $onplay_mtg_ctx ) {
+				$onplay_search_action = $onplay_shop_url;
+				$onplay_search_tcg    = 'mtg';
 			} else {
 				$onplay_search_action = $onplay_shop_url;
+				$onplay_search_tcg    = 'global';
 			}
 			?>
 			<form
@@ -71,7 +76,7 @@
 				class="site-header__search<?php echo $onplay_op_ctx ? ' site-header__search--op' : ''; ?>"
 				action="<?php echo esc_url( $onplay_search_action ); ?>"
 				data-onplay-search
-				data-tcg="<?php echo $onplay_op_ctx ? 'op' : 'global'; ?>"
+				data-tcg="<?php echo esc_attr( $onplay_search_tcg ); ?>"
 			>
 				<svg class="site-header__search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 					<circle cx="11" cy="11" r="8"/>
@@ -102,6 +107,8 @@
 						data-onplay-search-context
 						aria-live="polite"
 					><?php esc_html_e( 'Buscando en One Piece', 'onplay' ); ?></span>
+				<?php elseif ( $onplay_mtg_ctx ) : ?>
+					<input type="hidden" name="tcg" value="mtg" />
 				<?php endif; ?>
 				<div
 					id="onplay-search-results"
