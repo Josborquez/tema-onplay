@@ -80,6 +80,18 @@ Este tema se construye por módulos. Ver `CLAUDE.md` sección 6:
 
 El pipeline oficial de ingesta es **onplay-manager** (`github.com/Josborquez/onplay-manager`). Este tema **no modifica** su contrato. Si hay tensión tema vs manager, el manager gana y se ajusta el tema. Detalle completo en `CLAUDE.md` sección 3.
 
+## Módulos add-on
+
+### M-OP-filtros — Panel facetado One Piece TCG
+
+Sidebar de filtros propio para la categoría One Piece TCG (`/shop/?set=one-piece-tcg`). Filtra por **Color** (con soporte de duales `Red/Yellow`, `Red/Purple`), **Tipo de carta** (Leader/Character/Event/Stage), **Tipo de ilustración** (Normal/Alternate Art).
+
+- **Spec/plan/tasks**: `docs/specs/M-OP-filtros/`.
+- **Código**: `inc/op-filters.php` + `inc/op-filters/{query,panel,enqueue}.php` + `template-parts/op-filters/group-{color,card-type,illustration}.php` + `assets/src/scss/components/_op-filters.scss` + `assets/src/js/op-filters.js`.
+- **Estrategia**: extiende el pipeline existente `inc/filters-ajax.php` mediante 2 filter hooks (`onplay_filters_state_after_parse`, `onplay_filters_meta_query`). NO crea custom taxonomies — opera vía `meta_query` sobre los meta del Binder OP. Deuda técnica documentada en `CLAUDE.md` §3.7.
+- **Para deshabilitar**: comentar `require_once ONPLAY_THEME_DIR . '/inc/op-filters.php';` en `functions.php`. Sin DB writes ni hooks persistentes — rollback inmediato.
+- **Performance**: índices SQL recomendados en `docs/op-filters-sql-indexes.md` (aplicables cuando el catálogo OP supere ~500 productos).
+
 ## Licencia
 
 GPL-2.0-or-later. Propiedad de Comercializadora y Distribuidora BM Limitada (RUT 77.862.085-5).
