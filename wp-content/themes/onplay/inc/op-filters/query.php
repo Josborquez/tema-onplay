@@ -290,6 +290,15 @@ function onplay_op_apply_tax_exclusion( $tax_query, $state ) {
 	if ( empty( $state['tcg'] ) ) {
 		return $tax_query;
 	}
+
+	// Resolución de conflicto: si el usuario hizo una elección explícita de
+	// set=, esa gana sobre el tcg= (que es un default de contexto). Sin esto,
+	// `?tcg=mtg&set=one-piece-tcg` da 0 (mtg excluye OP, set fuerza OP, AND
+	// vacío). Idem `?tcg=op&set=khans` en sentido inverso.
+	if ( ! empty( $state['set'] ) ) {
+		return $tax_query;
+	}
+
 	if ( 'mtg' === $state['tcg'] ) {
 		// Magic-strict: excluir descendientes de one-piece-tcg.
 		$tax_query[] = array(

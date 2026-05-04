@@ -158,10 +158,17 @@
 					$onepiece_term = get_term_by( 'slug', 'one-piece-tcg', 'product_cat' );
 					$onepiece_url  = '';
 					if ( $onepiece_term && ! is_wp_error( $onepiece_term ) ) {
-						// Forzar el link al shop con set= para que el redirect 302 de
-						// /product-category/<slug>/ aterrice limpio en /shop/?set=...
-						// y el contexto OP quede inmediatamente activo.
-						$onepiece_url = add_query_arg( 'set', $onepiece_term->slug, $magic_url );
+						// CRÍTICO: el OP link se arma sobre $magic_shop_root (limpio)
+						// y NO sobre $magic_url (que ya trae ?tcg=mtg). Si heredáramos
+						// $magic_url, el link quedaría /shop/?tcg=mtg&set=one-piece-tcg
+						// y los dos params se contradicen → 0 resultados.
+						$onepiece_url = add_query_arg(
+							array(
+								'set' => $onepiece_term->slug,
+								'tcg' => 'op',
+							),
+							$magic_shop_root
+						);
 					}
 					if ( $onepiece_url ) : ?>
 						<a
