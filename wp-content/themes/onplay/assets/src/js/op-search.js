@@ -26,7 +26,9 @@
 	// ── Helpers ─────────────────────────────────────────────
 	function getCtx() {
 		if (!S.form) return "global";
-		return S.form.getAttribute("data-tcg") === "op" ? "op" : "global";
+		var t = S.form.getAttribute("data-tcg");
+		if (t === "op" || t === "mtg") return t;
+		return "global";
 	}
 
 	function escapeHTML(s) {
@@ -55,8 +57,8 @@
 			encodeURIComponent(q);
 
 		var ctx = getCtx();
-		if (ctx === "op") {
-			url += "&tcg=op";
+		if (ctx === "op" || ctx === "mtg") {
+			url += "&tcg=" + ctx;
 		}
 
 		// Trackeamos el contexto que usamos en este fetch para que render

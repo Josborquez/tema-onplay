@@ -134,9 +134,13 @@
 						)
 					);
 				} else {
-					$magic_url = function_exists( 'wc_get_page_id' ) && wc_get_page_id( 'shop' ) > 0
+					$magic_shop_root = function_exists( 'wc_get_page_id' ) && wc_get_page_id( 'shop' ) > 0
 						? get_permalink( wc_get_page_id( 'shop' ) )
 						: home_url( '/tienda/' );
+					// El link "Magic" del nav lleva al shop con tcg=mtg para que el
+					// listing aplique la exclusión simétrica de OP. Sin esto, /shop/
+					// plano mostraba grupos OP + Magic mezclados (M5 default global).
+					$magic_url = add_query_arg( 'tcg', 'mtg', $magic_shop_root );
 
 					// Determinar TCG activo: si onplay_op_in_op_context() es true,
 					// "One Piece" se resalta. Si es archive Magic, single Magic, o

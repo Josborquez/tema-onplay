@@ -60,7 +60,12 @@ function onplay_filters_parse_request( $src ) {
 		'sort'      => isset( $src['sort'] ) ? sanitize_key( wp_unslash( $src['sort'] ) ) : 'price-desc',
 		'page'      => isset( $src['page'] ) ? max( 1, (int) $src['page'] ) : 1,
 		'q'         => isset( $src['q'] ) ? sanitize_text_field( wp_unslash( $src['q'] ) ) : '',
+		'tcg'       => isset( $src['tcg'] ) ? sanitize_key( wp_unslash( $src['tcg'] ) ) : '',
 	);
+
+	if ( ! in_array( $state['tcg'], array( 'op', 'mtg' ), true ) ) {
+		$state['tcg'] = '';
+	}
 
 	if ( ! in_array( $state['foil'], array( 'all', 'regular', 'foil' ), true ) ) {
 		$state['foil'] = 'all';
@@ -176,6 +181,12 @@ function onplay_filters_query_ids( $state ) {
 			'operator' => 'NOT IN',
 		);
 	}
+
+	/**
+	 * Permite a módulos add-on (M-OP-buscador) agregar clausulas al tax_query
+	 * antes de la WP_Query. Útil para exclusiones tipo NOT IN (one-piece-tcg).
+	 */
+	$tax_query = apply_filters( 'onplay_filters_tax_query', $tax_query, $state );
 
 	if ( count( $tax_query ) > 1 ) {
 		$args['tax_query'] = $tax_query;

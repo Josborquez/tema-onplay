@@ -276,6 +276,44 @@ function onplay_op_apply_meta_query( $meta_query, $state ) {
 add_filter( 'onplay_filters_meta_query', 'onplay_op_apply_meta_query', 10, 2 );
 
 /**
+ * Hook 2.b — exclusión simétrica para Magic-strict en el listing.
+ *
+ * Cuando state['tcg'] === 'mtg' (search submit con ?tcg=mtg desde header
+ * Magic), excluye productos descendientes de one-piece-tcg del tax_query
+ * del listing. Inverso del filtro op_color/op_type que SOLO incluye OP.
+ *
+ * @param array $tax_query
+ * @param array $state
+ * @return array
+ */
+function onplay_op_apply_tax_exclusion( $tax_query, $state ) {
+	if ( empty( $state['tcg'] ) ) {
+		return $tax_query;
+	}
+	if ( 'mtg' === $state['tcg'] ) {
+		// Magic-strict: excluir descendientes de one-piece-tcg.
+		$tax_query[] = array(
+			'taxonomy'         => 'product_cat',
+			'field'            => 'slug',
+			'terms'            => array( ONPLAY_OP_ROOT_SLUG ),
+			'include_children' => true,
+			'operator'         => 'NOT IN',
+		);
+	} elseif ( 'op' === $state['tcg'] ) {
+		// OP-only: incluir solo descendientes de one-piece-tcg.
+		$tax_query[] = array(
+			'taxonomy'         => 'product_cat',
+			'field'            => 'slug',
+			'terms'            => array( ONPLAY_OP_ROOT_SLUG ),
+			'include_children' => true,
+			'operator'         => 'IN',
+		);
+	}
+	return $tax_query;
+}
+add_filter( 'onplay_filters_tax_query', 'onplay_op_apply_tax_exclusion', 10, 2 );
+
+/**
  * Hook 3 — defensivo. La main query del archive no rendea el grid del listing
  * (eso lo hace filters-ajax mediante WP_Query propio), pero algunos consumidores
  * sí la usan (canonical, schemas SEO, BreadcrumbList). Mantener consistencia.
