@@ -12,6 +12,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// M-OP-filtros: el sidebar de OP es estructuralmente distinto (sin sets, rareza
+// ni idioma — esos no aplican al modelo de datos del Binder OP). Bail temprano
+// y delegamos al render del módulo, que produce un <aside> equivalente.
+if ( function_exists( 'onplay_op_is_archive' ) && onplay_op_is_archive() ) {
+	onplay_op_render_sidebar();
+	return;
+}
+
 $set_facets   = onplay_get_set_facet_counts();
 $lang_terms   = onplay_get_attribute_terms( 'pa_idioma' );
 $cond_terms   = onplay_get_attribute_terms( 'pa_estado' );
