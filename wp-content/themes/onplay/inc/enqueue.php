@@ -76,8 +76,12 @@ add_action(
 				'ajaxUrl' => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
 				'nonce'   => wp_create_nonce( 'onplay_search' ),
 				'i18n'    => array(
-					'noResults' => __( 'Sin resultados locales', 'onplay' ),
-					'fromLabel' => __( 'Desde', 'onplay' ),
+					'noResults'   => __( 'Sin resultados locales', 'onplay' ),
+					'fromLabel'   => __( 'Desde', 'onplay' ),
+					// M-OP-buscador.
+					'opNoResults' => __( 'No encontramos cartas en One Piece con', 'onplay' ),
+					'opSearchAll' => __( 'Buscar en todo el sitio', 'onplay' ),
+					'opAltArt'    => __( 'Alt Art', 'onplay' ),
 				),
 			)
 		);
