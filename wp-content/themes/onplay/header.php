@@ -52,13 +52,26 @@
 			if ( isset( $_GET['q'] ) ) {
 				$onplay_search_q = sanitize_text_field( wp_unslash( $_GET['q'] ) );
 			}
+
+			// M-OP-buscador: si el usuario está navegando OP (archive descendiente
+			// o single product OP), restringimos el buscador a ese universo.
+			$onplay_op_ctx = function_exists( 'onplay_op_in_op_context' ) && onplay_op_in_op_context();
+			if ( $onplay_op_ctx ) {
+				// Submit form va al shop con set=one-piece-tcg para mantener el
+				// contexto al aterrizar en el listado (archive-product.php parsea
+				// el param `q` para búsqueda libre).
+				$onplay_search_action = add_query_arg( 'set', 'one-piece-tcg', $onplay_shop_url );
+			} else {
+				$onplay_search_action = $onplay_shop_url;
+			}
 			?>
 			<form
 				role="search"
 				method="get"
-				class="site-header__search"
-				action="<?php echo esc_url( $onplay_shop_url ); ?>"
+				class="site-header__search<?php echo $onplay_op_ctx ? ' site-header__search--op' : ''; ?>"
+				action="<?php echo esc_url( $onplay_search_action ); ?>"
 				data-onplay-search
+				data-tcg="<?php echo $onplay_op_ctx ? 'op' : 'global'; ?>"
 			>
 				<svg class="site-header__search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 					<circle cx="11" cy="11" r="8"/>
@@ -81,6 +94,15 @@
 					data-onplay-search-input
 				/>
 				<span class="site-header__search-hint" aria-hidden="true">⌘K</span>
+				<?php if ( $onplay_op_ctx ) : ?>
+					<input type="hidden" name="set" value="one-piece-tcg" />
+					<input type="hidden" name="tcg" value="op" />
+					<span
+						class="site-header__search-context"
+						data-onplay-search-context
+						aria-live="polite"
+					><?php esc_html_e( 'Buscando en One Piece', 'onplay' ); ?></span>
+				<?php endif; ?>
 				<div
 					id="onplay-search-results"
 					class="site-header__search-results"
@@ -110,7 +132,14 @@
 						: home_url( '/tienda/' );
 					?>
 					<a href="<?php echo esc_url( $magic_url ); ?>" class="nav-item is-active">Magic</a>
-					<span class="nav-item is-soon">One Piece <span class="badge badge-proximamente">Pronto</span></span>
+					<?php
+					$onepiece_term = get_term_by( 'slug', 'one-piece-tcg', 'product_cat' );
+					$onepiece_url  = ( $onepiece_term && ! is_wp_error( $onepiece_term ) ) ? get_term_link( $onepiece_term ) : '';
+					if ( $onepiece_url && ! is_wp_error( $onepiece_url ) ) : ?>
+						<a href="<?php echo esc_url( $onepiece_url ); ?>" class="nav-item">One Piece</a>
+					<?php else : ?>
+						<span class="nav-item is-soon">One Piece <span class="badge badge-proximamente">Pronto</span></span>
+					<?php endif; ?>
 					<span class="nav-item is-soon">Pokémon <span class="badge badge-proximamente">Pronto</span></span>
 					<span class="nav-item is-soon">Riftbound <span class="badge badge-proximamente">Pronto</span></span>
 					<?php
