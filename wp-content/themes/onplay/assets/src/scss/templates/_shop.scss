@@ -4,6 +4,49 @@
 	padding: var(--space-10) 0 var(--space-16);
 }
 
+// Breadcrumb encima del header del shop. Pequeño, mono uppercase.
+.shop-breadcrumb {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+	margin-bottom: var(--space-4);
+	font-family: var(--mono);
+	font-size: 11px;
+	color: var(--mid-2);
+	letter-spacing: 0.04em;
+
+	a {
+		color: var(--mid-2);
+		text-decoration: none;
+		transition: color var(--t-fast);
+
+		&:hover {
+			color: var(--bone);
+		}
+	}
+
+	&__sep {
+		color: var(--mid);
+		opacity: 0.7;
+	}
+
+	&__current {
+		color: var(--bone);
+	}
+}
+
+// Modifier OP del header — gradient sutil carmesí en la línea inferior, fiel
+// al diseño listing-onepiece.jsx.
+.shop-header--op {
+	background: linear-gradient(180deg, rgba(214, 40, 40, 0.06), transparent);
+	margin-left: calc(var(--space-4) * -1);
+	margin-right: calc(var(--space-4) * -1);
+	padding-left: var(--space-4);
+	padding-right: var(--space-4);
+	padding-top: var(--space-2);
+}
+
 .shop-header {
 	display: flex;
 	align-items: flex-end;

@@ -23,15 +23,35 @@ $initial_state = onplay_filters_parse_request( $_GET );
 // /tienda/ sin params, in_stock=true por default.
 $initial = onplay_filters_run( $initial_state );
 
+// Contexto de TCG para que el shop-header refleje dónde está el usuario.
+// is_op = navegando dentro de One Piece (set=one-piece-tcg o descendiente).
+$onplay_shop_is_op = function_exists( 'onplay_op_is_archive' ) && onplay_op_is_archive();
+
 ?>
 <main class="shop-main">
 	<div class="container">
 
-		<header class="shop-header">
+		<nav class="shop-breadcrumb" aria-label="<?php esc_attr_e( 'Migas de pan', 'onplay' ); ?>">
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Inicio', 'onplay' ); ?></a>
+			<span class="shop-breadcrumb__sep" aria-hidden="true">/</span>
+			<?php if ( $onplay_shop_is_op ) : ?>
+				<span><?php esc_html_e( 'One Piece Card Game', 'onplay' ); ?></span>
+				<span class="shop-breadcrumb__sep" aria-hidden="true">/</span>
+				<span class="shop-breadcrumb__current"><?php esc_html_e( 'Singles', 'onplay' ); ?></span>
+			<?php else : ?>
+				<span><?php esc_html_e( 'Magic: The Gathering', 'onplay' ); ?></span>
+				<span class="shop-breadcrumb__sep" aria-hidden="true">/</span>
+				<span class="shop-breadcrumb__current"><?php esc_html_e( 'Singles', 'onplay' ); ?></span>
+			<?php endif; ?>
+		</nav>
+
+		<header class="shop-header<?php echo $onplay_shop_is_op ? ' shop-header--op' : ''; ?>">
 			<div class="shop-header__lead">
 				<div class="shop-header__kicker">
 					<?php
-					if ( is_product_category() ) {
+					if ( $onplay_shop_is_op ) {
+						echo esc_html__( 'Bandai · TCG', 'onplay' );
+					} elseif ( is_product_category() ) {
 						echo esc_html__( 'Categoría', 'onplay' );
 					} elseif ( is_shop() ) {
 						echo esc_html__( 'Catálogo', 'onplay' );
@@ -42,7 +62,9 @@ $initial = onplay_filters_run( $initial_state );
 				</div>
 				<h1 class="shop-header__title">
 					<?php
-					if ( is_shop() ) {
+					if ( $onplay_shop_is_op ) {
+						esc_html_e( 'Singles · One Piece', 'onplay' );
+					} elseif ( is_shop() ) {
 						esc_html_e( 'Singles · Magic: The Gathering', 'onplay' );
 					} else {
 						echo esc_html( wp_strip_all_tags( woocommerce_page_title( false ) ) );

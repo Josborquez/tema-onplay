@@ -130,13 +130,33 @@
 					$magic_url = function_exists( 'wc_get_page_id' ) && wc_get_page_id( 'shop' ) > 0
 						? get_permalink( wc_get_page_id( 'shop' ) )
 						: home_url( '/tienda/' );
+
+					// Determinar TCG activo: si onplay_op_in_op_context() es true,
+					// "One Piece" se resalta. Si es archive Magic, single Magic, o
+					// shop sin contexto OP, "Magic" se resalta. En home/cuenta/checkout
+					// queda Magic activo (default del MVP — tienda primaria es Magic).
+					$onplay_active_tcg = ( function_exists( 'onplay_op_in_op_context' ) && onplay_op_in_op_context() )
+						? 'op'
+						: 'magic';
 					?>
-					<a href="<?php echo esc_url( $magic_url ); ?>" class="nav-item is-active">Magic</a>
+					<a
+						href="<?php echo esc_url( $magic_url ); ?>"
+						class="nav-item<?php echo 'magic' === $onplay_active_tcg ? ' is-active' : ''; ?>"
+					>Magic</a>
 					<?php
 					$onepiece_term = get_term_by( 'slug', 'one-piece-tcg', 'product_cat' );
-					$onepiece_url  = ( $onepiece_term && ! is_wp_error( $onepiece_term ) ) ? get_term_link( $onepiece_term ) : '';
-					if ( $onepiece_url && ! is_wp_error( $onepiece_url ) ) : ?>
-						<a href="<?php echo esc_url( $onepiece_url ); ?>" class="nav-item">One Piece</a>
+					$onepiece_url  = '';
+					if ( $onepiece_term && ! is_wp_error( $onepiece_term ) ) {
+						// Forzar el link al shop con set= para que el redirect 302 de
+						// /product-category/<slug>/ aterrice limpio en /shop/?set=...
+						// y el contexto OP quede inmediatamente activo.
+						$onepiece_url = add_query_arg( 'set', $onepiece_term->slug, $magic_url );
+					}
+					if ( $onepiece_url ) : ?>
+						<a
+							href="<?php echo esc_url( $onepiece_url ); ?>"
+							class="nav-item<?php echo 'op' === $onplay_active_tcg ? ' is-active' : ''; ?>"
+						>One Piece</a>
 					<?php else : ?>
 						<span class="nav-item is-soon">One Piece <span class="badge badge-proximamente">Pronto</span></span>
 					<?php endif; ?>

@@ -24,6 +24,8 @@ get_header();
 
 	<?php get_template_part( 'template-parts/home/recent-cards' ); ?>
 
+	<?php get_template_part( 'template-parts/home/sell-cards' ); ?>
+
 </main>
 
 <?php
