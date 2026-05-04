@@ -13,6 +13,20 @@
 defined( 'ABSPATH' ) || exit;
 
 $cart = WC()->cart;
+
+// CRÍTICO: el AJAX `wc-ajax=update_order_review` invoca este template via
+// `woocommerce_order_review()` que solo pasa `checkout` como variable. NO
+// pasa `$order_button_text`. Sin este fallback, la línea que usa
+// `esc_attr($order_button_text)` lanza un warning que corrompe la respuesta
+// JSON y devuelve 500 en producción (depende de display_errors). Definirlo
+// aquí hace al template self-sufficient — si form-checkout.php ya lo definió
+// antes, el apply_filters da el mismo resultado.
+if ( ! isset( $order_button_text ) ) {
+	$order_button_text = apply_filters(
+		'woocommerce_order_button_text',
+		__( 'Realizar pedido', 'onplay' )
+	);
+}
 ?>
 
 <div class="checkout-review">
